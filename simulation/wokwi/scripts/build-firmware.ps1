@@ -38,21 +38,24 @@ if ($Bootstrap) {
   & $arduinoCli core update-index
 
   Write-Host "[setup] Installing ESP32 core (if needed)..."
-  & $arduinoCli core install esp32:esp32
+  & $arduinoCli core install esp32:esp32@3.3.7
 
-  Write-Host "[setup] Installing required library (if needed)..."
+  Write-Host "[setup] Installing required libraries (if needed)..."
   & $arduinoCli lib install "DHT sensor library for ESPx"
+  & $arduinoCli lib install "DHTesp"
 }
 
 Write-Host "[build] Compiling $sketchPath"
-& $arduinoCli compile `
-  --fqbn $Fqbn `
-  --build-path "$buildDir" `
-  --output-dir "$buildDir" `
-  "$stagingDir"
-
-if (Test-Path $stagingDir) {
-  Remove-Item -Path $stagingDir -Recurse -Force -ErrorAction SilentlyContinue
+try {
+  & $arduinoCli compile `
+    --fqbn $Fqbn `
+    --build-path "$buildDir" `
+    --output-dir "$buildDir" `
+    "$stagingDir"
+} finally {
+  if (Test-Path $stagingDir) {
+    Remove-Item -Path $stagingDir -Recurse -Force -ErrorAction SilentlyContinue
+  }
 }
 
 $targetBin = Join-Path $buildDir "sketch.ino.bin"

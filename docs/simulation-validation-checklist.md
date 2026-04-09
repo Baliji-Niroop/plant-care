@@ -1,23 +1,21 @@
-# Simulation Validation Checklist (Digital Twin)
+# Simulation Validation Checklist
 
-This checklist tracks simulation evidence quality and completion status.
+This checklist records the current digital-twin evidence set.
 
-## Completion Tracker
+## Status
 
-- [x] Baseline wet-soil hold (pump remains OFF)
-- [x] Scenario 1: Dry soil triggers watering
-- [x] Scenario 2: Tank-low safety interlock blocks watering
-- [x] Scenario 3: System overview capture
-- [x] Optional Scenario 4: Cooldown behavior proof
+- [x] Wet-soil hold
+- [x] Dry-soil watering
+- [x] Tank-empty interlock
+- [x] System overview capture
+- [x] Cooldown behavior
 
-Current status: Digital-twin scenarios are captured and checklist evidence is complete.
-
-## Baseline: Wet Soil Hold
+## Wet-soil hold
 
 Purpose:
-- Confirm controller does not activate pump when soil is already wet.
+- Confirm the controller keeps the pump off when soil is already wet.
 
-Expected telemetry pattern:
+Expected telemetry:
 
 ```text
 soil_raw=4095
@@ -27,71 +25,59 @@ decision=hold_soil_ok
 ```
 
 Success criteria:
-- Pump remains OFF through repeated loop cycles.
-- Decision remains hold_soil_ok while tank is available.
+- Pump stays OFF across repeated loop cycles.
+- Decision remains `hold_soil_ok` while tank water is available.
 
-## Scenario 1: Dry Soil Activates Pump
+## Dry-soil watering
 
 Purpose:
-- Verify pump starts when moisture falls below threshold and tank has water.
+- Confirm watering starts when moisture drops below the threshold and the tank is available.
 
 Procedure:
 1. Open the simulator and start serial monitoring.
-2. Lower soil value until moisture percent falls below threshold.
-3. Observe decision and pump state transition.
+2. Lower the soil input until moisture falls below the threshold.
+3. Confirm the pump state changes to ON.
 
-Expected output:
+Expected telemetry:
 
 ```text
 decision=watering_start
 pump=ON
 ```
 
-Capture requirements:
-- Include pump indicator ON.
-- Include serial line showing pump=ON and decision=watering_start.
-- Record timestamp and key serial lines in validation notes.
-
-## Scenario 2: Tank-Low Safety Interlock
+## Tank-empty interlock
 
 Purpose:
-- Verify tank-empty condition overrides dry-soil watering request.
+- Confirm tank-empty status overrides a dry-soil request.
 
 Procedure:
-1. Keep dry-soil condition active.
-2. Toggle tank level input to empty state.
-3. Observe decision and pump state.
+1. Keep the soil dry condition active.
+2. Set the tank input to empty.
+3. Confirm watering is blocked.
 
-Expected output:
+Expected telemetry:
 
 ```text
 decision=hold_tank_empty
 pump=OFF
 ```
 
-Capture requirements:
-- Include tank switch state and serial output in one frame.
-- Record timestamp and key serial lines in validation notes.
-
-## Scenario 3: System Overview
+## System overview
 
 Purpose:
-- Provide one full-architecture state check for documentation context.
+- Capture one complete simulator state for documentation.
 
 Procedure:
-1. Reset simulator into stable state.
-2. Keep all major components visible.
-3. Include serial monitor if readability allows.
+1. Reset the simulator into a stable state.
+2. Keep the major components visible.
+3. Include the serial monitor if it remains readable.
 
-Capture requirements:
-- Record current simulator setup and active components in validation notes.
-
-## Optional Scenario 4: Cooldown Behavior
+## Cooldown behavior
 
 Purpose:
-- Demonstrate anti-chatter cooldown after a watering cycle.
+- Confirm the anti-chatter cooldown after watering.
 
-Expected sequence example:
+Expected sequence:
 
 ```text
 ACTION: watering_start
@@ -99,20 +85,11 @@ ACTION: watering_stop -> cooldown_start
 ACTION: cooldown_end
 ```
 
-Capture requirements:
-- Show sequence context clearly in serial monitor.
-- Record sequence lines with timestamps in validation notes.
+## Evidence bundle
 
-## Evidence Bundle
+Required:
+- Completed checklist for the scenarios above
+- Serial excerpts for watering start and tank interlock hold
 
-Minimum required evidence:
-- Scenario completion checklist marked for baseline + scenarios 1-3
-- Serial telemetry excerpts for watering start and tank interlock hold
-
-Recommended evidence:
-- Serial telemetry excerpts for cooldown behavior
-
-## Notes
-
-- Digital twin evidence is acceptable for software-first validation.
-- Hardware validation can be documented as Phase 2.
+Recommended:
+- Serial excerpt for cooldown behavior

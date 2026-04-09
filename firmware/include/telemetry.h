@@ -17,8 +17,8 @@ class Telemetry {
     Serial.begin(SERIAL_BAUD_RATE);
     delay(100);
     Serial.println();
-    Serial.println("ESP32 Plant Irrigation");
-    Serial.println("Boot complete. Starting monitoring.");
+    Serial.println("ESP32 Smart Plant Irrigation");
+    Serial.println("System ready. Monitoring started.");
     Serial.println();
   }
 

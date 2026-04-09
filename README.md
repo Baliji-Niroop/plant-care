@@ -1,91 +1,54 @@
 # ESP32 Smart Plant Irrigation
 
-An ESP32 irrigation controller with two tracks: modular firmware for real hardware and a local Wokwi digital twin for repeatable validation and demos.
+An ESP32 irrigation controller with a modular firmware path for the real device and a local Wokwi digital twin for repeatable validation.
 
-## Project Overview
+## Overview
 
-The controller reads soil moisture, temperature/humidity (DHT22), and tank level, then decides whether watering is allowed. It includes three practical safety controls:
-- **Tank interlock**: prevents dry-run by blocking pump when water is unavailable
-- **Cooldown delay**: anti-chatter mechanism that enforces pause between watering cycles
-- **Watchdog timeout**: hard safety cutoff if pump runtime exceeds expected limit
+The controller reads soil moisture, temperature, humidity, and tank level before deciding whether watering is safe. The software includes three core safeguards:
 
-## Architecture
+- **Tank interlock** prevents dry-run operation.
+- **Cooldown control** prevents rapid pump cycling.
+- **Watchdog timeout** stops the pump if runtime exceeds the limit.
 
-| Layer | Files |
+## Repository layout
+
+| Area | Purpose |
 |---|---|
-| Firmware (modular) | `firmware/main.ino`, `firmware/include/config.h`, `firmware/include/sensors.h`, `firmware/include/irrigation.h`, `firmware/include/telemetry.h` |
-| Digital twin (Wokwi) | `simulation/wokwi/sketch.ino`, `simulation/wokwi/diagram.json`, `simulation/wokwi/wokwi.toml`, `simulation/wokwi/scripts/` |
-| Validation assets | `docs/simulation-validation-checklist.md` |
-| Hardware notes | `hardware/components_list.txt`, `hardware/assembly_notes.txt` |
+| `firmware/` | Production firmware and reusable control modules |
+| `simulation/wokwi/` | Local digital twin, build scripts, and Wokwi assets |
+| `docs/` | Validation notes and scenario coverage |
+| `hardware/` | Hardware references and later-stage prototype work |
 
-## Local Digital Twin Workflow
+## Local workflow
 
-1. Install dependencies once:
+1. Install dependencies:
    - `arduino-cli core update-index`
-   - `arduino-cli core install esp32:esp32`
+   - `arduino-cli core install esp32:esp32@3.3.7`
    - `arduino-cli lib install "DHT sensor library for ESPx"`
-2. Run **`Wokwi: Build Firmware`** from VS Code tasks.
-3. Start **`Wokwi: Start Simulator`**.
-4. Verify generated outputs:
-   - `simulation/wokwi/build/sketch.ino.bin`
-   - `simulation/wokwi/build/sketch.ino.elf`
-
-## Validation Evidence
-
-Validation is documented through serial telemetry logs and scenario outcomes in `docs/simulation-validation-checklist.md`.
-
-## Hardware Roadmap
-
-Current state: digital twin validated firmware logic.
-
-**Planned path:**
-1. **Phase 1 - Digital Twin** ✅ Complete: decision logic and safety behavior
-2. **Phase 2 - Physical Prototype** (next): bench wiring, pump/tank tests, enclosure
-3. **Phase 3 - Cloud Telemetry** (future): remote dashboard and long-run trend logging
-
-### Prototype Stages
-
-**Stage 1 - Bench Prototype** (component integration and initial testing)
-
-📋 **To Update**: Follow `hardware/BUILD_GUIDE.md` to wire components on breadboard and record Stage 1 validation notes.
-
-**Stage 2 - Assembled Prototype** (enclosure and field-ready configuration)
-
-📋 **To Update**: After Stage 1 validation, mount components to proto-board or PCB in enclosure and record final assembly notes.
+   - `arduino-cli lib install "DHTesp"`
+2. Run **Wokwi: Build Firmware** from the VS Code task list.
+3. Run **Wokwi: Start Simulator**.
+4. Review the generated firmware artifacts in `simulation/wokwi/build/`.
 
 ## Configuration
 
-Main tuning values are in `firmware/include/config.h`:
-- `SOIL_DRY_THRESHOLD_PERCENT` (default: 60%)
-- `PUMP_ON_DURATION_MS` (default: 5000 ms)
-- `PUMP_COOLDOWN_MS` (default: 60000 ms)
-- `PUMP_WATCHDOG_MS` (default: 10000 ms)
+Primary tuning values live in `firmware/include/config.h`:
 
----
+- `SOIL_DRY_THRESHOLD_PERCENT`
+- `PUMP_ON_DURATION_MS`
+- `PUMP_COOLDOWN_MS`
+- `PUMP_WATCHDOG_MS`
 
 ## Documentation
 
-### Quick Start
-- **New to project?** Start with this README
-- **Building hardware?** See `hardware/BUILD_GUIDE.md`
-
-### Complete Documentation
 | Document | Purpose |
 |---|---|
-| `README.md` (this file) | Project overview and architecture |
-| `simulation/wokwi/README.md` | Wokwi simulator setup and usage |
-| `docs/simulation-validation-checklist.md` | Complete validation test cases |
-| `hardware/README.md` | Hardware build status and calibration |
-| `hardware/BUILD_GUIDE.md` | Step-by-step Stage 1 bench wiring instructions |
-| `hardware/components_list.txt` | Bill of materials with costs |
-| `hardware/assembly_notes.txt` | 4-day build log and lessons learned |
+| `simulation/wokwi/README.md` | Simulator setup and usage |
+| `docs/simulation-validation-checklist.md` | Scenario list and evidence notes |
+| `hardware/BUILD_GUIDE.md` | Hardware work for later stages |
 
----
+## Status
 
-## Outcomes
-
-- Clean modular firmware structure for embedded interviews and reviews
-- Local simulation workflow that can be rerun on any machine with VS Code + Wokwi + Arduino CLI
-- Clear validation trail for pump activation, interlock behavior, and cooldown logic
+The software side is structured for review and simulation. Hardware work remains deferred.
 
 Project by Niroop Baliji.
