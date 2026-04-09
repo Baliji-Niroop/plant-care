@@ -42,16 +42,27 @@ Photo placeholder:
 
 ## Calibration Log
 
-Record measured values from physical testing before final tuning.
+**From Initial Bench Testing (Day 2 - See assembly_notes.txt)**:
+- Soil raw (air dry): 3950 ADC
+- Soil raw (water saturated): 1650 ADC
+- Current dry threshold: 60% (firmware/include/config.h - SOIL_DRY_THRESHOLD_PERCENT)
+- Current pump duration: 5000 ms (firmware/include/config.h - PUMP_ON_DURATION_MS)
 
-- Soil raw (air dry): pending
-- Soil raw (water saturated): pending
-- Final dry threshold percent: pending
-- Final pump duration ms: pending
+**Calibration Status**: ⚠️ **AWAITING PHYSICAL HARDWARE BUILD**
+- [ ] Stage 1 bench assembly complete - recalibrate with actual components
+- [ ] Final threshold tuning after observing real plant moisture patterns
+- [ ] Pump timing optimization based on tank capacity and plant needs
 
 ## Next Steps
 
-1. Complete Stage 1 wiring and capture photos.
-2. Replace stage placeholders with real hardware images.
-3. Run full validation checklist and attach evidence images.
-4. Update firmware thresholds using measured calibration data.
+**Immediate (Blocking Hardware Build)**:
+1. ✅ Procure missing components: 5V mini water pump, tank-level switch/float switch
+2. Execute Stage 1 bench wiring using `hardware/BUILD_GUIDE.md` steps
+3. Run physical validation checklist and capture evidence photos
+4. Update `docs/images/prototype-stage1-placeholder.png` with real bench photo
+
+**After Stage 1 Photos**:
+5. Replace simulation results with hardware results in IEEE paper
+6. Execute Stage 2 assembly and integrated testing
+7. Update `docs/images/prototype-stage2-placeholder.png` with real assembly photo
+8. Finalize calibration data from extended operation

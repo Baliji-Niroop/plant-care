@@ -7,9 +7,9 @@ An ESP32 irrigation controller with two tracks: modular firmware for real hardwa
 ## Project Overview
 
 The controller reads soil moisture, temperature/humidity (DHT22), and tank level, then decides whether watering is allowed. It includes three practical safety controls:
-- tank interlock (no dry-run)
-- cooldown delay (anti-chatter)
-- watchdog timeout (hard pump cutoff)
+- **Tank interlock**: prevents dry-run by blocking pump when water is unavailable
+- **Cooldown delay**: anti-chatter mechanism that enforces pause between watering cycles
+- **Watchdog timeout**: hard safety cutoff if pump runtime exceeds expected limit
 
 ## Architecture
 
@@ -34,35 +34,75 @@ The controller reads soil moisture, temperature/humidity (DHT22), and tank level
 
 ## Validation Evidence
 
+**Figure 1: Pump Active Validation** - Serial telemetry showing pump activation when soil moisture falls below threshold.
 ![Pump Active Validation](docs/images/pump-active.png)
+
+**Figure 2: Tank Safety Interlock** - System behavior demonstrating pump blocking when tank level is low/empty.
 ![Tank Safety Interlock](docs/images/safety-interlock.png)
+
+**Figure 3: Cooldown Logic Proof** - Telemetry trace showing cooldown delay enforcement between consecutive watering cycles.
 ![Cooldown Logic Proof](docs/images/cooldown-proof.png)
 
-Validation scenarios and capture steps are documented in `docs/simulation-validation-checklist.md`.
+For detailed validation scenarios and capture steps, see `docs/simulation-validation-checklist.md`.
 
 ## Hardware Roadmap
 
 Current state: digital twin validated firmware logic.
 
-Planned path:
-1. **Digital twin** (done): decision logic and safety behavior
-2. **Physical prototype** (next): bench wiring, pump/tank tests, enclosure
-3. **Cloud telemetry** (future): remote dashboard and long-run trend logging
+**Planned path:**
+1. **Phase 1 - Digital Twin** ✅ Complete: decision logic and safety behavior
+2. **Phase 2 - Physical Prototype** (next): bench wiring, pump/tank tests, enclosure
+3. **Phase 3 - Cloud Telemetry** (future): remote dashboard and long-run trend logging
 
-### Prototype Image Placeholders
+### Prototype Stages
 
-- Stage 1 bench prototype: `docs/images/prototype-stage1-placeholder.png`
-- Stage 2 assembled prototype: `docs/images/prototype-stage2-placeholder.png`
+**Stage 1 - Bench Prototype** (component integration and initial testing)
 
-Replace these files with real photos when hardware milestones are complete.
+*Placeholder image pending hardware build*:
+![Stage 1 Bench Prototype](docs/images/prototype-stage1-placeholder.png)
+
+📋 **To Update**: Follow `hardware/BUILD_GUIDE.md` to wire components on breadboard, then capture overhead photo showing all connections and component placement. Replace this placeholder with real hardware photo.
+
+**Stage 2 - Assembled Prototype** (enclosure and field-ready configuration)
+
+*Placeholder image pending hardware assembly*:
+![Stage 2 Assembled Prototype](docs/images/prototype-stage2-placeholder.png)
+
+📋 **To Update**: After Stage 1 validation, mount components to proto-board or PCB in enclosure, then capture photo from multiple angles (front, side, internals). Replace this placeholder with final assembly photo.
 
 ## Configuration
 
 Main tuning values are in `firmware/include/config.h`:
-- `SOIL_DRY_THRESHOLD_PERCENT`
-- `PUMP_ON_DURATION_MS`
-- `PUMP_COOLDOWN_MS`
-- `PUMP_WATCHDOG_MS`
+- `SOIL_DRY_THRESHOLD_PERCENT` (default: 60%)
+- `PUMP_ON_DURATION_MS` (default: 5000 ms)
+- `PUMP_COOLDOWN_MS` (default: 60000 ms)
+- `PUMP_WATCHDOG_MS` (default: 10000 ms)
+
+---
+
+## Documentation
+
+### Quick Start
+- **New to project?** Start with this README
+- **Building hardware?** See `hardware/BUILD_GUIDE.md`
+- **Troubleshooting?** See `TROUBLESHOOTING.md`
+- **Creating screenshots for paper?** See `SCREENSHOT_GUIDE.md`
+
+### Complete Documentation
+| Document | Purpose |
+|---|---|
+| `README.md` (this file) | Project overview and architecture |
+| `simulation/wokwi/README.md` | Wokwi simulator setup and usage |
+| `docs/simulation-validation-checklist.md` | Complete validation test cases |
+| `hardware/README.md` | Hardware build status and calibration |
+| `hardware/BUILD_GUIDE.md` | Step-by-step Stage 1 bench wiring instructions |
+| `hardware/components_list.txt` | Bill of materials with costs |
+| `hardware/assembly_notes.txt` | 4-day build log and lessons learned |
+| `IEEE_REPORT_DRAFT.md` | Academic paper draft (version 2) |
+| `TROUBLESHOOTING.md` | Common issues and solutions |
+| `SCREENSHOT_GUIDE.md` | Instructions for capturing Wokwi evidence figures |
+
+---
 
 ## Outcomes
 

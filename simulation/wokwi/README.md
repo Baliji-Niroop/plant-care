@@ -29,14 +29,21 @@ This folder is a local digital twin for quick demos and validation in VS Code.
 
 ## Local Build (Required for firmware/ELF mode)
 1. Install `arduino-cli` and make sure it is available in `PATH`.
+   - **Windows**: Download from https://arduino.cc/pro/software or use `choco install arduino-cli`
+   - **macOS**: `brew install arduino-cli`
+   - **Linux**: `apt install arduino-cli` or download from GitHub
 2. Install ESP32 core once:
-	- `arduino-cli core update-index`
-	- `arduino-cli core install esp32:esp32`
-3. Install required library once:
-	- `arduino-cli lib install "DHT sensor library for ESPx"`
+   - `arduino-cli core update-index`
+   - `arduino-cli core install esp32:esp32@2.0.13`
+3. Install required libraries:
+   - `arduino-cli lib install "DHT sensor library for ESPx"`
+   - `arduino-cli lib install "DHTesp"`
 4. Build firmware:
-	- Run VS Code task: `Wokwi: Build Firmware`
-	- or run: `powershell -ExecutionPolicy Bypass -File simulation\wokwi\scripts\build-firmware.ps1`
+   - **VS Code Task**: `Wokwi: Build Firmware`
+   - **Or manually**: `powershell -ExecutionPolicy Bypass -File simulation\wokwi\scripts\build-firmware.ps1`
+   - Output: `build/sketch.ino.bin` and `build/sketch.ino.elf`
+
+**Note**: If build fails, see `TROUBLESHOOTING.md` for help
 
 ## Run Locally in VS Code
 1. Build first so `build/sketch.ino.bin` and `build/sketch.ino.elf` exist.
