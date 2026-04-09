@@ -206,13 +206,15 @@ ESP32 5V or VIN → Breadboard Red Rail (if available; otherwise use USB)
 
 ---
 
-## Next: Documentation Updates
+## Next: Photography & Documentation
 
 Once all systems verified:
 
-1. **Record**: Final wiring notes and any pin changes from this guide
-2. **Record**: Serial output logs showing all four validation scenarios
-3. **Update**: `hardware/README.md` with "Stage 1: ✅ Complete" and validation date
+1. **Take overhead photo** of breadboard layout showing all connections
+2. **Take side photo** with pump action in progress (for evidence)
+3. **Save as**: `docs/images/prototype-stage1-placeholder.png` (replace placeholder)
+4. **Record**: Serial output screenshot showing all four validation scenarios
+5. **Update**: `hardware/README.md` with "Stage 1: ✅ Complete" and photo date
 
 ---
 

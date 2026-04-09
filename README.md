@@ -1,54 +1,67 @@
 # ESP32 Smart Plant Irrigation
 
-An ESP32 irrigation controller with a modular firmware path for the real device and a local Wokwi digital twin for repeatable validation.
+An ESP32 irrigation controller with:
 
-## Overview
+- Modular production firmware in `firmware/`
+- A local Wokwi digital twin in `simulation/wokwi/`
+- A repeatable validation checklist in `docs/`
 
-The controller reads soil moisture, temperature, humidity, and tank level before deciding whether watering is safe. The software includes three core safeguards:
+## What this project guarantees
 
-- **Tank interlock** prevents dry-run operation.
-- **Cooldown control** prevents rapid pump cycling.
-- **Watchdog timeout** stops the pump if runtime exceeds the limit.
+The controller waters only when all safety conditions pass:
 
-## Repository layout
+- Tank interlock: blocks watering when the tank is empty.
+- Cooldown control: prevents rapid on/off pump cycling.
+- Watchdog timeout: stops pump runtime that exceeds the safety limit.
+- Sensor fail-safe: invalid sensor frames default to HOLD.
 
-| Area | Purpose |
-|---|---|
-| `firmware/` | Production firmware and reusable control modules |
-| `simulation/wokwi/` | Local digital twin, build scripts, and Wokwi assets |
-| `docs/` | Validation notes and scenario coverage |
-| `hardware/` | Hardware references and later-stage prototype work |
-
-## Local workflow
+## Quick start (beginner-first)
 
 1. Install dependencies:
    - `arduino-cli core update-index`
    - `arduino-cli core install esp32:esp32@3.3.7`
    - `arduino-cli lib install "DHT sensor library for ESPx"`
    - `arduino-cli lib install "DHTesp"`
-2. Run **Wokwi: Build Firmware** from the VS Code task list.
-3. Run **Wokwi: Start Simulator**.
-4. Review the generated firmware artifacts in `simulation/wokwi/build/`.
+2. In VS Code Tasks, run: `Wokwi: Build Firmware`
+3. Then run: `Wokwi: Start Simulator`
+4. Confirm artifacts exist in `simulation/wokwi/build/`:
+   - `sketch.ino.bin`
+   - `sketch.ino.elf`
 
-## Configuration
+## Validation flow
 
-Primary tuning values live in `firmware/include/config.h`:
+Use `docs/simulation-validation-checklist.md` and verify all scenarios:
+
+- Wet-soil hold
+- Dry-soil watering
+- Tank-empty interlock
+- Cooldown behavior
+
+If all checks pass, the digital twin is considered healthy.
+
+## Key configuration
+
+Primary tuning values are in `firmware/include/config.h`:
 
 - `SOIL_DRY_THRESHOLD_PERCENT`
+- `DECISION_DEBOUNCE_READINGS`
 - `PUMP_ON_DURATION_MS`
 - `PUMP_COOLDOWN_MS`
 - `PUMP_WATCHDOG_MS`
 
-## Documentation
+## Repo map
 
-| Document | Purpose |
+| Area | Purpose |
 |---|---|
-| `simulation/wokwi/README.md` | Simulator setup and usage |
-| `docs/simulation-validation-checklist.md` | Scenario list and evidence notes |
-| `hardware/BUILD_GUIDE.md` | Hardware work for later stages |
+| `firmware/` | Production firmware and reusable control modules |
+| `simulation/wokwi/` | Local digital twin, build scripts, Wokwi assets |
+| `docs/` | Validation notes and evidence checklist |
+| `hardware/` | Hardware references and assembly guidance |
 
-## Status
+## Troubleshooting
 
-The software side is structured for review and simulation. Hardware work remains deferred.
+- If simulator does not open from task, use `F1 -> Wokwi: Start Simulator`.
+- If build fails, rerun dependency install commands and retry build.
+- ESP32 BT pragma lines during compile are informational notes, not failures.
 
 Project by Niroop Baliji.

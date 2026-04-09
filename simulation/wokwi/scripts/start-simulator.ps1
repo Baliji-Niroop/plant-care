@@ -7,9 +7,9 @@ if ($null -eq $codeCommand) {
   exit 0
 }
 
-# Best-effort trigger for the Wokwi command from CLI.
+# Best-effort trigger for the Wokwi command from CLI via VS Code command URI.
 try {
-  & code --command wokwi.start
+  & code --open-url "vscode://command/wokwi.start"
   Write-Host "[start] Start command sent. If nothing opens, run: F1 -> Wokwi: Start Simulator"
 } catch {
   Write-Host "[start] Could not trigger Wokwi from CLI. Run manually: F1 -> Wokwi: Start Simulator"

@@ -93,3 +93,16 @@ Required:
 
 Recommended:
 - Serial excerpt for cooldown behavior
+
+## Validation run log
+
+Date: 2026-04-09
+
+- Clean build: PASS
+- Firmware build: PASS
+- Simulator start trigger: PASS
+
+Notes:
+- Firmware size: 292624 bytes (22%).
+- Global memory: 22252 bytes (6%).
+- ESP32 BT pragma note appears during compile and is informational (not an error).

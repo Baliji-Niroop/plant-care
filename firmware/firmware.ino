@@ -11,9 +11,25 @@ IrrigationController irrigation;
 Telemetry telemetry;
 
 SystemState systemState = STATE_MONITORING;
+SystemState previousState = STATE_MONITORING;
 unsigned long lastSensorReadMs = 0;
 SensorData currentData{};
 IrrigationDecision lastDecision{};
+constexpr unsigned long MAIN_LOOP_DELAY_MS = 100UL;
+
+void setSystemState(SystemState nextState) {
+  if (systemState == nextState) {
+    return;
+  }
+
+  previousState = systemState;
+  systemState = nextState;
+
+  Serial.print("[state] ");
+  Serial.print(previousState);
+  Serial.print(" -> ");
+  Serial.println(systemState);
+}
 
 void setup() {
   telemetry.begin();
@@ -33,6 +49,11 @@ void loop() {
     currentData = sensors.read();
     lastSensorReadMs = millis();
     lastDecision = irrigation.evaluate(currentData);
+
+    // Enter error mode only after repeated sensor failures.
+    if (!sensors.healthy()) {
+      setSystemState(STATE_ERROR);
+    }
   }
 
   switch (systemState) {
@@ -40,41 +61,40 @@ void loop() {
       if (lastDecision.shouldWater) {
         const bool started = irrigation.startPump();
         if (started) {
-          systemState = STATE_WATERING;
+          setSystemState(STATE_WATERING);
           Serial.println("[event] Pump started");
         }
-      } else if (!sensors.healthy()) {
-        systemState = STATE_ERROR;
       }
       break;
 
     case STATE_WATERING:
       if (!irrigation.isRunning()) {
-        systemState = STATE_COOLDOWN;
+        setSystemState(STATE_COOLDOWN);
         Serial.println("[event] Pump stopped");
       }
       break;
 
     case STATE_COOLDOWN:
-      if (!irrigation.inCooldown()) {
-        systemState = STATE_MONITORING;
-      }
       if (irrigation.state() == PUMP_WATCHDOG_TRIGGERED) {
-        systemState = STATE_ERROR;
+        setSystemState(STATE_ERROR);
+      } else if (!irrigation.inCooldown()) {
+        setSystemState(STATE_MONITORING);
       }
       break;
 
     case STATE_ERROR:
-      irrigation.stopPump();
-      Serial.println("[warn] error mode, check sensors");
+      if (irrigation.isRunning()) {
+        irrigation.stopPump();
+        Serial.println("[safety] Pump forced off in error state");
+      }
       if (sensors.healthy()) {
         Serial.println("[info] sensors ok again");
-        systemState = STATE_MONITORING;
+        setSystemState(STATE_MONITORING);
       }
       break;
   }
 
   telemetry.periodicReport(currentData, lastDecision, systemState, irrigation);
 
-  delay(100);
+  delay(MAIN_LOOP_DELAY_MS);
 }

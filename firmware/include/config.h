@@ -9,7 +9,8 @@ constexpr uint8_t PIN_DHT = 4;            // DHT data
 constexpr uint8_t PIN_TANK_SWITCH = 5;    // Float switch
 constexpr uint8_t PIN_RELAY = 18;         // Relay input
 
-constexpr uint8_t DHT_SENSOR_TYPE = DHT22;
+// Keep this numeric so config.h does not depend on DHT.h include order.
+constexpr uint8_t DHT_SENSOR_TYPE = 22;
 
 // Control thresholds
 constexpr int SOIL_DRY_THRESHOLD_PERCENT = 60;

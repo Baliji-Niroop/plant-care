@@ -24,6 +24,15 @@ class Telemetry {
 
   void printSensorData(const SensorData& data) {
     Serial.println("--- Sensor Snapshot ---");
+    Serial.print("Reading: ");
+    Serial.println(data.validReading ? "valid" : "invalid");
+
+    if (!data.validReading) {
+      Serial.println("Sensor frame invalid; decision remains fail-safe HOLD");
+      Serial.println();
+      return;
+    }
+
     Serial.print("Soil: ");
     Serial.print(data.soilMoisturePercent, 1);
     Serial.println(data.soilMoisturePercent < SOIL_DRY_THRESHOLD_PERCENT ? "% [dry]" : "% [ok]");
