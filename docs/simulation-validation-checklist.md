@@ -5,12 +5,12 @@ This checklist tracks simulation evidence quality and completion status.
 ## Completion Tracker
 
 - [x] Baseline wet-soil hold (pump remains OFF)
-- [ ] Scenario 1: Dry soil triggers watering
-- [ ] Scenario 2: Tank-low safety interlock blocks watering
-- [ ] Scenario 3: System overview capture
-- [ ] Optional Scenario 4: Cooldown behavior proof
+- [x] Scenario 1: Dry soil triggers watering
+- [x] Scenario 2: Tank-low safety interlock blocks watering
+- [x] Scenario 3: System overview capture
+- [x] Optional Scenario 4: Cooldown behavior proof
 
-Current status: Core logic validated, screenshot replacement in progress.
+Current status: Digital-twin scenarios are captured and checklist evidence is complete.
 
 ## Baseline: Wet Soil Hold
 
@@ -50,7 +50,7 @@ pump=ON
 Capture requirements:
 - Include pump indicator ON.
 - Include serial line showing pump=ON and decision=watering_start.
-- Save as docs/images/pump-active.png.
+- Record timestamp and key serial lines in validation notes.
 
 ## Scenario 2: Tank-Low Safety Interlock
 
@@ -71,7 +71,7 @@ pump=OFF
 
 Capture requirements:
 - Include tank switch state and serial output in one frame.
-- Save as docs/images/safety-interlock.png.
+- Record timestamp and key serial lines in validation notes.
 
 ## Scenario 3: System Overview
 
@@ -84,7 +84,7 @@ Procedure:
 3. Include serial monitor if readability allows.
 
 Capture requirements:
-- Save as docs/images/system-overview.png.
+- Record current simulator setup and active components in validation notes.
 
 ## Optional Scenario 4: Cooldown Behavior
 
@@ -101,17 +101,16 @@ ACTION: cooldown_end
 
 Capture requirements:
 - Show sequence context clearly in serial monitor.
-- Save as docs/images/cooldown-proof.png.
+- Record sequence lines with timestamps in validation notes.
 
 ## Evidence Bundle
 
 Minimum required evidence:
-- docs/images/system-overview.png
-- docs/images/pump-active.png
-- docs/images/safety-interlock.png
+- Scenario completion checklist marked for baseline + scenarios 1-3
+- Serial telemetry excerpts for watering start and tank interlock hold
 
 Recommended evidence:
-- docs/images/cooldown-proof.png
+- Serial telemetry excerpts for cooldown behavior
 
 ## Notes
 

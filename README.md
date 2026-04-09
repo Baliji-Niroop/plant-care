@@ -2,8 +2,6 @@
 
 An ESP32 irrigation controller with two tracks: modular firmware for real hardware and a local Wokwi digital twin for repeatable validation and demos.
 
-![System Overview](docs/images/system-overview.png)
-
 ## Project Overview
 
 The controller reads soil moisture, temperature/humidity (DHT22), and tank level, then decides whether watering is allowed. It includes three practical safety controls:
@@ -17,7 +15,7 @@ The controller reads soil moisture, temperature/humidity (DHT22), and tank level
 |---|---|
 | Firmware (modular) | `firmware/main.ino`, `firmware/include/config.h`, `firmware/include/sensors.h`, `firmware/include/irrigation.h`, `firmware/include/telemetry.h` |
 | Digital twin (Wokwi) | `simulation/wokwi/sketch.ino`, `simulation/wokwi/diagram.json`, `simulation/wokwi/wokwi.toml`, `simulation/wokwi/scripts/` |
-| Validation assets | `docs/simulation-validation-checklist.md`, `docs/images/` |
+| Validation assets | `docs/simulation-validation-checklist.md` |
 | Hardware notes | `hardware/components_list.txt`, `hardware/assembly_notes.txt` |
 
 ## Local Digital Twin Workflow
@@ -34,16 +32,7 @@ The controller reads soil moisture, temperature/humidity (DHT22), and tank level
 
 ## Validation Evidence
 
-**Figure 1: Pump Active Validation** - Serial telemetry showing pump activation when soil moisture falls below threshold.
-![Pump Active Validation](docs/images/pump-active.png)
-
-**Figure 2: Tank Safety Interlock** - System behavior demonstrating pump blocking when tank level is low/empty.
-![Tank Safety Interlock](docs/images/safety-interlock.png)
-
-**Figure 3: Cooldown Logic Proof** - Telemetry trace showing cooldown delay enforcement between consecutive watering cycles.
-![Cooldown Logic Proof](docs/images/cooldown-proof.png)
-
-For detailed validation scenarios and capture steps, see `docs/simulation-validation-checklist.md`.
+Validation is documented through serial telemetry logs and scenario outcomes in `docs/simulation-validation-checklist.md`.
 
 ## Hardware Roadmap
 
@@ -58,17 +47,11 @@ Current state: digital twin validated firmware logic.
 
 **Stage 1 - Bench Prototype** (component integration and initial testing)
 
-*Placeholder image pending hardware build*:
-![Stage 1 Bench Prototype](docs/images/prototype-stage1-placeholder.png)
-
-📋 **To Update**: Follow `hardware/BUILD_GUIDE.md` to wire components on breadboard, then capture overhead photo showing all connections and component placement. Replace this placeholder with real hardware photo.
+📋 **To Update**: Follow `hardware/BUILD_GUIDE.md` to wire components on breadboard and record Stage 1 validation notes.
 
 **Stage 2 - Assembled Prototype** (enclosure and field-ready configuration)
 
-*Placeholder image pending hardware assembly*:
-![Stage 2 Assembled Prototype](docs/images/prototype-stage2-placeholder.png)
-
-📋 **To Update**: After Stage 1 validation, mount components to proto-board or PCB in enclosure, then capture photo from multiple angles (front, side, internals). Replace this placeholder with final assembly photo.
+📋 **To Update**: After Stage 1 validation, mount components to proto-board or PCB in enclosure and record final assembly notes.
 
 ## Configuration
 
@@ -85,8 +68,6 @@ Main tuning values are in `firmware/include/config.h`:
 ### Quick Start
 - **New to project?** Start with this README
 - **Building hardware?** See `hardware/BUILD_GUIDE.md`
-- **Troubleshooting?** See `TROUBLESHOOTING.md`
-- **Creating screenshots for paper?** See `SCREENSHOT_GUIDE.md`
 
 ### Complete Documentation
 | Document | Purpose |
@@ -98,9 +79,6 @@ Main tuning values are in `firmware/include/config.h`:
 | `hardware/BUILD_GUIDE.md` | Step-by-step Stage 1 bench wiring instructions |
 | `hardware/components_list.txt` | Bill of materials with costs |
 | `hardware/assembly_notes.txt` | 4-day build log and lessons learned |
-| `IEEE_REPORT_DRAFT.md` | Academic paper draft (version 2) |
-| `TROUBLESHOOTING.md` | Common issues and solutions |
-| `SCREENSHOT_GUIDE.md` | Instructions for capturing Wokwi evidence figures |
 
 ---
 

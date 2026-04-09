@@ -9,7 +9,8 @@ $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $projectDir = Resolve-Path (Join-Path $scriptDir "..")
 $sketchPath = Join-Path $projectDir "sketch.ino"
 $buildDir = Join-Path $projectDir "build"
-$stagingDir = Join-Path $buildDir "sketch"
+$tempRoot = [System.IO.Path]::GetTempPath()
+$stagingDir = Join-Path $tempRoot "plant-care-wokwi-staging\sketch"
 $stagedSketch = Join-Path $stagingDir "sketch.ino"
 $arduinoCli = Get-Command arduino-cli -ErrorAction SilentlyContinue
 
@@ -49,6 +50,10 @@ Write-Host "[build] Compiling $sketchPath"
   --build-path "$buildDir" `
   --output-dir "$buildDir" `
   "$stagingDir"
+
+if (Test-Path $stagingDir) {
+  Remove-Item -Path $stagingDir -Recurse -Force -ErrorAction SilentlyContinue
+}
 
 $targetBin = Join-Path $buildDir "sketch.ino.bin"
 $targetElf = Join-Path $buildDir "sketch.ino.elf"
