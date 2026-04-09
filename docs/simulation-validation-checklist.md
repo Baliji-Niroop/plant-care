@@ -76,7 +76,7 @@ Capture requirements:
 ## Scenario 3: System Overview
 
 Purpose:
-- Provide one full-architecture screenshot for documentation context.
+- Provide one full-architecture state check for documentation context.
 
 Procedure:
 1. Reset simulator into stable state.

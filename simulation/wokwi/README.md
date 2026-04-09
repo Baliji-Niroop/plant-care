@@ -3,7 +3,7 @@
 This folder is a local digital twin for quick demos and validation in VS Code.
 
 ## Files
-- `diagram.json`: visual circuit (left-to-right layout for clean screenshots)
+- `diagram.json`: visual circuit with a clear left-to-right signal layout
 - `sketch.ino`: single-file ESP32 simulation firmware
 - `wokwi.toml`: Wokwi binary/ELF runtime config
 - `libraries.txt`: explicit library list for reliable local builds
@@ -43,7 +43,7 @@ This folder is a local digital twin for quick demos and validation in VS Code.
    - **Or manually**: `powershell -ExecutionPolicy Bypass -File simulation\wokwi\scripts\build-firmware.ps1`
    - Output: `build/sketch.ino.bin` and `build/sketch.ino.elf`
 
-**Note**: If build fails, see `TROUBLESHOOTING.md` for help
+**Note**: If build fails, rerun `Wokwi: Clean Build` and then `Wokwi: Build Firmware`.
 
 ## Run Locally in VS Code
 1. Build first so `build/sketch.ino.bin` and `build/sketch.ino.elf` exist.
@@ -59,7 +59,7 @@ This folder is a local digital twin for quick demos and validation in VS Code.
 4. Confirm cooldown prevents immediate retrigger.
 5. Set tank switch OFF and confirm watering is blocked.
 
-## Screenshot Tips
-- Keep the simulator zoom around 90-110%.
-- Use the left-to-right signal flow in `diagram.json` for publication-friendly captures.
-- Capture both circuit view and serial telemetry to show control decisions.
+## Validation Tips
+- Keep simulator wiring readable and labels visible during checks.
+- Use serial telemetry output to verify control decisions.
+- Record key timestamps and decision lines in project validation notes.
