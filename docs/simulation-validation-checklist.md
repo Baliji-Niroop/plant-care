@@ -1,9 +1,21 @@
 # Simulation Validation Checklist (Digital Twin)
 
-The project is in digital twin validation.
-Repeated telemetry with pump OFF during wet-soil conditions is expected.
+This checklist tracks simulation evidence quality and completion status.
 
-## Current Baseline (Wet Soil Hold)
+## Completion Tracker
+
+- [x] Baseline wet-soil hold (pump remains OFF)
+- [ ] Scenario 1: Dry soil triggers watering
+- [ ] Scenario 2: Tank-low safety interlock blocks watering
+- [ ] Scenario 3: System overview capture
+- [ ] Optional Scenario 4: Cooldown behavior proof
+
+Current status: Core logic validated, screenshot replacement in progress.
+
+## Baseline: Wet Soil Hold
+
+Purpose:
+- Confirm controller does not activate pump when soil is already wet.
 
 Expected telemetry pattern:
 
@@ -14,98 +26,94 @@ pump=OFF
 decision=hold_soil_ok
 ```
 
-What this confirms:
-- Soil is interpreted as already wet.
-- Controller correctly holds pump OFF.
-- Baseline logic is working.
+Success criteria:
+- Pump remains OFF through repeated loop cycles.
+- Decision remains hold_soil_ok while tank is available.
 
-## Proof Scenario 1: Dry Soil Activates Pump
+## Scenario 1: Dry Soil Activates Pump
 
-Goal:
-- Force moisture below threshold and verify watering decision.
+Purpose:
+- Verify pump starts when moisture falls below threshold and tank has water.
 
-Steps:
-1. In Wokwi, click the soil analog resistor/sensor element.
-2. Reduce value until moisture drops below threshold.
-3. Watch serial output for decision change.
+Procedure:
+1. Open the simulator and start serial monitoring.
+2. Lower soil value until moisture percent falls below threshold.
+3. Observe decision and pump state transition.
 
-Expected result:
+Expected output:
 
 ```text
 decision=watering_start
 pump=ON
 ```
 
-Screenshot evidence:
-- Capture when all are visible at once:
-  - Pump indicator (blue LED) ON
-  - Serial output shows `pump=ON`
-  - Dry soil condition is visible in simulator
-- Save image as `docs/images/pump-active.png`
+Capture requirements:
+- Include pump indicator ON.
+- Include serial line showing pump=ON and decision=watering_start.
+- Save as docs/images/pump-active.png.
 
-## Proof Scenario 2: Tank-Low Safety Interlock
+## Scenario 2: Tank-Low Safety Interlock
 
-Goal:
-- Prove safety override blocks pump even during dry soil.
+Purpose:
+- Verify tank-empty condition overrides dry-soil watering request.
 
-Steps:
+Procedure:
 1. Keep dry-soil condition active.
-2. Toggle tank level switch to OFF (tank low).
-3. Observe serial output and pump state.
+2. Toggle tank level input to empty state.
+3. Observe decision and pump state.
 
-Expected result:
+Expected output:
 
 ```text
 decision=hold_tank_empty
 pump=OFF
 ```
 
-Screenshot evidence:
-- Capture serial + circuit state showing safety hold.
-- Save image as `docs/images/safety-interlock.png`
+Capture requirements:
+- Include tank switch state and serial output in one frame.
+- Save as docs/images/safety-interlock.png.
 
-## Proof Scenario 3: System Overview
+## Scenario 3: System Overview
 
-Goal:
-- Capture one clean full-system view for architecture context.
+Purpose:
+- Provide one full-architecture screenshot for documentation context.
 
-Steps:
-1. Reset simulator to a clean stable state.
-2. Keep all major components visible in one frame.
-3. Include Serial Monitor if possible.
+Procedure:
+1. Reset simulator into stable state.
+2. Keep all major components visible.
+3. Include serial monitor if readability allows.
 
-Screenshot evidence:
-- Save image as `docs/images/system-overview.png`
+Capture requirements:
+- Save as docs/images/system-overview.png.
 
-## Optional Proof Scenario 4: Cooldown Behavior
+## Optional Scenario 4: Cooldown Behavior
 
-Goal:
-- Demonstrate anti-chatter control after a watering cycle.
+Purpose:
+- Demonstrate anti-chatter cooldown after a watering cycle.
 
-Expected serial sequence (example):
+Expected sequence example:
 
 ```text
-Pump started
-Pump stopped
-Cooldown active
-Cooldown finished
+ACTION: watering_start
+ACTION: watering_stop -> cooldown_start
+ACTION: cooldown_end
 ```
 
-Screenshot evidence:
-- Save image as `docs/images/cooldown-proof.png`
+Capture requirements:
+- Show sequence context clearly in serial monitor.
+- Save as docs/images/cooldown-proof.png.
 
-## Portfolio Evidence Pack
+## Evidence Bundle
 
-Minimum proof set:
-- `docs/images/system-overview.png`
-- `docs/images/pump-active.png`
-- `docs/images/safety-interlock.png`
+Minimum required evidence:
+- docs/images/system-overview.png
+- docs/images/pump-active.png
+- docs/images/safety-interlock.png
 
-Recommended addition:
-- `docs/images/cooldown-proof.png`
+Recommended evidence:
+- docs/images/cooldown-proof.png
 
 ## Notes
 
-- Physical hardware is not required at this stage.
-- Digital twin validation is valid engineering evidence for firmware logic and safety behavior.
-- Hardware prototype testing can be treated as Phase 2 validation.
+- Digital twin evidence is acceptable for software-first validation.
+- Hardware validation can be documented as Phase 2.

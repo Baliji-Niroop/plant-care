@@ -8,6 +8,8 @@ static const uint8_t PIN_TANK_SWITCH = 5;
 static const uint8_t PIN_RELAY = 18;
 
 // Control tuning
+// Lower threshold (35%) for easier simulation demos vs production firmware (60%).
+// This makes watering cycles happen faster while validating behavior.
 static const int MOISTURE_THRESHOLD_PERCENT = 35;   // Start watering below this moisture level
 static const unsigned long WATERING_DURATION_MS = 6000;
 static const unsigned long WATERING_WATCHDOG_MS = 10000;
@@ -43,6 +45,8 @@ SensorFrame readSensors() {
   s.dhtValid = !(isnan(s.temperatureC) || isnan(s.humidityPercent));
 
   s.soilRaw = analogRead(PIN_SOIL);
+  // Simplified 0-4095 mapping for quick demo testing.
+  // Production firmware uses calibrated values 3950-1650 (see firmware/include/sensors.h).
   s.moisturePercent = map(s.soilRaw, 0, 4095, 0, 100);
   s.moisturePercent = constrain(s.moisturePercent, 0, 100);
 
@@ -55,7 +59,8 @@ SensorFrame readSensors() {
 // Pump control
 void setPump(bool on) {
   pumpOn = on;
-  // Typical relay modules are active-low.
+  // Wokwi relay module is active-low (opposite of modular firmware active-high default).
+  // Production config uses RELAY_ON=HIGH, but Wokwi relay expects LOW=ON.
   digitalWrite(PIN_RELAY, on ? LOW : HIGH);
 }
 
