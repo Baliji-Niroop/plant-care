@@ -1,0 +1,2 @@
+simulation/wokwi/build/*
+!simulation/wokwi/build/.gitkeep

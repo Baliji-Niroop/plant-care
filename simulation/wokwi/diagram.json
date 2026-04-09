@@ -1,0 +1,58 @@
+{
+  "version": 1,
+  "author": "Baliji Niroop",
+  "editor": "wokwi",
+  "parts": [
+    { "type": "wokwi-esp32-devkit-v1", "id": "esp32", "top": 0, "left": 0, "attrs": {} },
+    {
+      "type": "wokwi-dht22",
+      "id": "dht1",
+      "top": -191.7,
+      "left": -24.6,
+      "attrs": { "temperature": "24", "humidity": "65" }
+    },
+    { "type": "wokwi-slide-switch", "id": "tank_sw", "top": 0, "left": -200, "attrs": {} },
+    {
+      "type": "wokwi-resistor",
+      "id": "soil_sim",
+      "top": 120,
+      "left": -200,
+      "rotate": 90,
+      "attrs": { "value": "10000" }
+    },
+    { "type": "wokwi-relay-module", "id": "relay1", "top": 0, "left": 250, "attrs": {} },
+    {
+      "type": "wokwi-led",
+      "id": "pump_led",
+      "top": -32.4,
+      "left": 378.2,
+      "attrs": { "color": "blue" }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "led_r",
+      "top": 110.4,
+      "left": 364.25,
+      "rotate": 90,
+      "attrs": { "value": "220" }
+    }
+  ],
+  "connections": [
+    [ "esp32:TX0", "$serialMonitor:RX", "", [] ],
+    [ "esp32:RX0", "$serialMonitor:TX", "", [] ],
+    [ "dht1:VCC", "esp32:3V3", "red", [ "v57.6", "h172.8", "v172.8", "h-61.9" ] ],
+    [ "dht1:GND", "esp32:GND.1", "black", [ "v28.8", "h163.2", "v197" ] ],
+    [ "dht1:SDA", "esp32:D4", "green", [ "v38.4", "h172.9", "v158.4" ] ],
+    [ "soil_sim:1", "esp32:3V3", "red", [ "v134.4", "h295.45", "v-71.9" ] ],
+    [ "soil_sim:2", "esp32:D34", "orange", [ "v-106.8", "h175.65" ] ],
+    [ "tank_sw:1", "esp32:3V3", "red", [ "v234.8", "h385.5", "v-115.2", "h-90.7" ] ],
+    [ "tank_sw:2", "esp32:D5", "yellow", [ "v206", "h328", "v-148.7" ] ],
+    [ "relay1:VCC", "esp32:VIN", "red", [ "v-76.6", "h-307.6", "v216.1" ] ],
+    [ "relay1:GND", "esp32:GND.2", "black", [ "v-38.6", "h-259.6", "v158.6" ] ],
+    [ "relay1:IN", "esp32:D18", "purple", [ "h-0.4", "v43.3" ] ],
+    [ "relay1:NO", "pump_led:A", "blue", [ "h68", "v-30.4" ] ],
+    [ "pump_led:C", "led_r:1", "blue", [ "h0.4", "v76.8" ] ],
+    [ "led_r:2", "esp32:GND.2", "black", [ "v66", "h-467.35", "v-62.2" ] ]
+  ],
+  "dependencies": {}
+}

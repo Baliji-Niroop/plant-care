@@ -1,0 +1,48 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Wokwi: Build Firmware",
+      "type": "shell",
+      "command": "powershell",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "simulation\\wokwi\\scripts\\build-firmware.ps1"
+      ],
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "Wokwi: Clean Build",
+      "type": "shell",
+      "command": "powershell",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "simulation\\wokwi\\scripts\\clean-build.ps1"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "Wokwi: Start Simulator",
+      "type": "shell",
+      "command": "powershell",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "simulation\\wokwi\\scripts\\start-simulator.ps1"
+      ],
+      "dependsOn": [
+        "Wokwi: Build Firmware"
+      ],
+      "problemMatcher": []
+    }
+  ]
+}

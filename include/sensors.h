@@ -5,30 +5,25 @@
 #include <DHT.h>
 #include "config.h"
 
-/**
- * SENSOR DATA STRUCTURE
- * Holds readings from all sensors for decision-making.
- * validReading flag indicates if DHT11 data should be trusted.
- */
 struct SensorData {
-  float soilMoisturePercent;  // 0-100%, mapped from ADC
-  float temperatureC;         // Celsius from DHT11
-  float humidityPercent;      // Relative humidity from DHT11
-  bool tankHasWater;          // Float switch state (debounced)
-  bool validReading;          // False if DHT11 returned NaN
+  float soilMoisturePercent;  // 0-100%
+  float temperatureC;
+  float humidityPercent;
+  bool tankHasWater;
+  bool validReading;
 };
 
-/**
- * SENSORS CLASS
- * Abstracts hardware interaction for all input sensors.
- * Handles ADC conversion, DHT timing, and switch debouncing.
- */
 class Sensors {
  private:
   DHT dht_;
-  int dhtErrorCount_;           // Consecutive DHT failures
-  bool lastTankState_;          // For debounce comparison
+  int dhtErrorCount_;
+  bool lastTankState_;
   unsigned long tankDebounceStart_;
+
+  // Calibration values for the capacitive soil sensor.
+  static constexpr int SOIL_RAW_DRY = 3950;
+  static constexpr int SOIL_RAW_WET = 1650;
+  static constexpr unsigned long TANK_DEBOUNCE_MS = 50UL;
 
  public:
   Sensors()
@@ -38,48 +33,28 @@ class Sensors {
         tankDebounceStart_(0) {}
 
   void begin() {
-    // ESP32 ADC resolution: 12-bit (0-4095)
     analogReadResolution(12);
-    
-    // Tank switch uses internal pull-up (saves external resistor)
+
     pinMode(PIN_TANK_SWITCH, INPUT_PULLUP);
-    
+
     dht_.begin();
-    
-    // DHT11 needs 1.5sec warm-up for stable readings
-    // Increase to 2sec in cold environments (<10°C)
+
+    // Allow a short warm-up for the DHT sensor.
     delay(1500);
   }
 
-  /**
-   * READ ALL SENSORS
-   * Returns complete sensor snapshot for decision logic.
-   * 
-   * SOIL SENSOR CALIBRATION:
-   * - Raw ADC: 4095 (dry/air) → 0 (submerged in water)
-   * - map() inverts and scales to 0-100%
-   * - If your sensor differs, calibrate per CALIBRATION.md
-   */
   SensorData read() {
     SensorData data{};
     data.validReading = true;
 
-    // Soil moisture: ADC reading inverted to percentage
+    // Convert raw ADC to approximate moisture percentage.
     const int rawSoil = analogRead(PIN_SOIL_SENSOR);
-    data.soilMoisturePercent = static_cast<float>(map(rawSoil, 4095, 0, 0, 100));
+    data.soilMoisturePercent = static_cast<float>(map(rawSoil, SOIL_RAW_DRY, SOIL_RAW_WET, 0, 100));
     data.soilMoisturePercent = constrain(data.soilMoisturePercent, 0.0f, 100.0f);
 
-    // DHT11 temperature and humidity
     data.temperatureC = dht_.readTemperature();
     data.humidityPercent = dht_.readHumidity();
 
-    /**
-     * DHT ERROR HANDLING (3-strike rule):
-     * - Single NaN: Use last valid reading (sensor glitch)
-     * - 3 consecutive NaN: Trigger ERROR state (hardware issue)
-     * 
-     * Common causes: timing violations, EMI from pump, low voltage
-     */
     if (isnan(data.temperatureC) || isnan(data.humidityPercent)) {
       data.validReading = false;
       dhtErrorCount_++;
@@ -87,13 +62,12 @@ class Sensors {
       dhtErrorCount_ = 0;
     }
 
-    // Tank float switch with 50ms debounce
-    // Prevents false readings from water slosh or switch bounce
+    // Debounce float switch changes to avoid slosh spikes.
     const bool currentTankState = digitalRead(PIN_TANK_SWITCH) == HIGH;
     if (currentTankState != lastTankState_) {
       tankDebounceStart_ = millis();
     }
-    if (millis() - tankDebounceStart_ > 50UL) {
+    if (millis() - tankDebounceStart_ > TANK_DEBOUNCE_MS) {
       lastTankState_ = currentTankState;
     }
     data.tankHasWater = lastTankState_;
@@ -101,13 +75,8 @@ class Sensors {
     return data;
   }
 
-  /**
-   * SENSOR HEALTH CHECK
-   * Returns false after 3 consecutive DHT failures.
-   * Used by main loop to enter ERROR state.
-   */
   bool healthy() const {
-    return dhtErrorCount_ < 3;
+    return dhtErrorCount_ < 3;  // Allow up to two transient failures.
   }
 };
 
