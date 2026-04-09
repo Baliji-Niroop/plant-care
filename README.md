@@ -15,7 +15,7 @@ The controller reads soil moisture, temperature/humidity (DHT22), and tank level
 
 | Layer | Files |
 |---|---|
-| Firmware (modular) | `main.ino`, `include/config.h`, `include/sensors.h`, `include/irrigation.h`, `include/telemetry.h` |
+| Firmware (modular) | `firmware/main.ino`, `firmware/include/config.h`, `firmware/include/sensors.h`, `firmware/include/irrigation.h`, `firmware/include/telemetry.h` |
 | Digital twin (Wokwi) | `simulation/wokwi/sketch.ino`, `simulation/wokwi/diagram.json`, `simulation/wokwi/wokwi.toml`, `simulation/wokwi/scripts/` |
 | Validation assets | `docs/simulation-validation-checklist.md`, `docs/images/` |
 | Hardware notes | `hardware/components_list.txt`, `hardware/assembly_notes.txt` |
@@ -58,7 +58,7 @@ Replace these files with real photos when hardware milestones are complete.
 
 ## Configuration
 
-Main tuning values are in `include/config.h`:
+Main tuning values are in `firmware/include/config.h`:
 - `SOIL_DRY_THRESHOLD_PERCENT`
 - `PUMP_ON_DURATION_MS`
 - `PUMP_COOLDOWN_MS`
