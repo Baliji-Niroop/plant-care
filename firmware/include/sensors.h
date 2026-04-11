@@ -35,7 +35,7 @@ class Sensors {
   void begin() {
     analogReadResolution(12);
 
-    pinMode(PIN_TANK_SWITCH, INPUT_PULLUP);
+    pinMode(PIN_TANK_SWITCH, TANK_SWITCH_PIN_MODE);
 
     dht_.begin();
 
@@ -63,7 +63,7 @@ class Sensors {
     }
 
     // Debounce float switch changes to avoid slosh spikes.
-    const bool currentTankState = digitalRead(PIN_TANK_SWITCH) == HIGH;
+    const bool currentTankState = digitalRead(PIN_TANK_SWITCH) == TANK_WATER_PRESENT_LEVEL;
     if (currentTankState != lastTankState_) {
       tankDebounceStart_ = millis();
     }

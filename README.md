@@ -1,47 +1,58 @@
 # ESP32 Smart Plant Irrigation
 
-An ESP32 irrigation controller with:
+This project is an automatic plant watering system built with ESP32.
+It includes:
 
-- Modular production firmware in `firmware/`
-- A local Wokwi digital twin in `simulation/wokwi/`
-- A repeatable validation checklist in `docs/`
+- production firmware in `firmware/`
+- a Wokwi simulator in `simulation/wokwi/`
+- validation notes in `docs/`
+- hardware build docs in `hardware/`
 
-## What this project guarantees
+## How it works
 
-The controller waters only when all safety conditions pass:
+The pump turns on only when all conditions are safe:
 
-- Tank interlock: blocks watering when the tank is empty.
-- Cooldown control: prevents rapid on/off pump cycling.
-- Watchdog timeout: stops pump runtime that exceeds the safety limit.
-- Sensor fail-safe: invalid sensor frames default to HOLD.
+1. Soil is dry enough.
+2. Tank has water.
+3. Cooldown time is over.
+4. Pump runtime is still inside watchdog limit.
 
-## Quick start (beginner-first)
+If sensor data is invalid, firmware chooses **HOLD** (safe behavior).
 
-1. Install dependencies:
+## Quick simulation setup
+
+1. Install tools and libraries:
    - `arduino-cli core update-index`
    - `arduino-cli core install esp32:esp32@3.3.7`
    - `arduino-cli lib install "DHT sensor library for ESPx"`
    - `arduino-cli lib install "DHTesp"`
-2. In VS Code Tasks, run: `Wokwi: Build Firmware`
-3. Then run: `Wokwi: Start Simulator`
-4. Confirm artifacts exist in `simulation/wokwi/build/`:
-   - `sketch.ino.bin`
-   - `sketch.ino.elf`
+2. Open `simulation/wokwi/wokwi.toml` and set:
+   - `wokwi_license = "YOUR_WOKWI_LICENSE_KEY"`
+3. Run VS Code task: **Wokwi: Build Firmware**
+4. Run VS Code task: **Wokwi: Start Simulator**
+5. Check output files:
+   - `simulation/wokwi/build/sketch.ino.bin`
+   - `simulation/wokwi/build/sketch.ino.elf`
 
-## Validation flow
+## Very important before hardware flashing
 
-Use `docs/simulation-validation-checklist.md` and verify all scenarios:
+- Flash only: `firmware/firmware.ino`
+- Do **not** flash: `simulation/wokwi/sketch.ino` (simulation-only)
 
-- Wet-soil hold
-- Dry-soil watering
-- Tank-empty interlock
-- Cooldown behavior
+Before flashing, confirm `firmware/include/config.h`:
 
-If all checks pass, the digital twin is considered healthy.
+- relay polarity:
+  - `RELAY_ON`
+  - `RELAY_OFF`
+- tank switch polarity:
+  - `TANK_SWITCH_PIN_MODE`
+  - `TANK_WATER_PRESENT_LEVEL`
 
-## Key configuration
+Default tank wiring is `INPUT_PULLUP` with switch between GPIO 5 and GND, so water-present level is `LOW`.
 
-Primary tuning values are in `firmware/include/config.h`:
+## Main tuning values
+
+All in `firmware/include/config.h`:
 
 - `SOIL_DRY_THRESHOLD_PERCENT`
 - `DECISION_DEBOUNCE_READINGS`
@@ -49,19 +60,20 @@ Primary tuning values are in `firmware/include/config.h`:
 - `PUMP_COOLDOWN_MS`
 - `PUMP_WATCHDOG_MS`
 
-## Repo map
+## Validation checklist
 
-| Area | Purpose |
+Use `docs/simulation-validation-checklist.md` to verify:
+
+- wet-soil hold
+- dry-soil watering
+- tank-empty interlock
+- cooldown behavior
+
+## Project structure
+
+| Path | Purpose |
 |---|---|
-| `firmware/` | Production firmware and reusable control modules |
-| `simulation/wokwi/` | Local digital twin, build scripts, Wokwi assets |
-| `docs/` | Validation notes and evidence checklist |
-| `hardware/` | Hardware references and assembly guidance |
-
-## Troubleshooting
-
-- If simulator does not open from task, use `F1 -> Wokwi: Start Simulator`.
-- If build fails, rerun dependency install commands and retry build.
-- ESP32 BT pragma lines during compile are informational notes, not failures.
-
-Project by Niroop Baliji.
+| `firmware/` | Real hardware firmware |
+| `simulation/wokwi/` | Local simulator and scripts |
+| `docs/` | Test checklist and notes |
+| `hardware/` | Wiring and assembly documentation |

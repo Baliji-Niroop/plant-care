@@ -2,3 +2,4 @@
 version = 1
 firmware = "build/sketch.ino.bin"
 elf = "build/sketch.ino.elf"
+wokwi_license = "YOUR_WOKWI_LICENSE_KEY"

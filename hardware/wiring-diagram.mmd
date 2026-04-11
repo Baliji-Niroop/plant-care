@@ -1,0 +1,73 @@
+flowchart LR
+  subgraph ESP32[ESP32 DevKit V1]
+    GPIO34["GPIO34 (ADC)"]
+    GPIO4["GPIO4 (DHT Data)"]
+    GPIO5["GPIO5 (Tank Switch In)"]
+    GPIO18["GPIO18 (Relay IN)"]
+    V33["3.3V"]
+    GND["GND"]
+  end
+
+  subgraph Soil[Capacitive Soil Sensor]
+    SOIL_VCC["VCC"]
+    SOIL_GND["GND"]
+    SOIL_AO["AO"]
+  end
+
+  subgraph DHT22[DHT22]
+    DHT_VCC["VCC"]
+    DHT_GND["GND"]
+    DHT_DATA["DATA"]
+  end
+
+  subgraph Float[Float Switch (2-wire, NO)]
+    FLOAT_A["Terminal A"]
+    FLOAT_B["Terminal B"]
+  end
+
+  subgraph Relay[1-Channel Relay Module]
+    RELAY_VCC["VCC (5V)"]
+    RELAY_GND["GND"]
+    RELAY_IN["IN"]
+    RELAY_COM["COM"]
+    RELAY_NO["NO"]
+  end
+
+  subgraph PumpSupply[External 5V Pump Supply]
+    PSU_P["5V +"]
+    PSU_N["5V -"]
+  end
+
+  subgraph Pump[5V DC Pump]
+    PUMP_P["Pump +"]
+    PUMP_N["Pump -"]
+  end
+
+  SOIL_VCC --> V33
+  SOIL_GND --> GND
+  SOIL_AO --> GPIO34
+
+  DHT_VCC --> V33
+  DHT_GND --> GND
+  DHT_DATA --> GPIO4
+
+  FLOAT_A --> GPIO5
+  FLOAT_B --> GND
+
+  GPIO18 --> RELAY_IN
+  RELAY_GND --> GND
+  RELAY_VCC --> PSU_P
+
+  PSU_P --> RELAY_COM
+  RELAY_NO --> PUMP_P
+  PUMP_N --> PSU_N
+
+  PSU_N --- GND
+
+  note1["Default firmware tank mode:\nINPUT_PULLUP + TANK_WATER_PRESENT_LEVEL=LOW"]:::note
+  note2["Relay ON/OFF polarity is module-dependent.\nSet RELAY_ON/RELAY_OFF in firmware/include/config.h"]:::note
+
+  note1 -.-> GPIO5
+  note2 -.-> GPIO18
+
+  classDef note fill:#f6f9ff,stroke:#7aa2ff,color:#1f3b73;

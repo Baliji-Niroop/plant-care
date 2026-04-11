@@ -35,6 +35,12 @@ constexpr int SERIAL_BAUD_RATE = 115200;
 constexpr uint8_t RELAY_ON = HIGH;
 constexpr uint8_t RELAY_OFF = LOW;
 
+// Tank switch electrical polarity.
+// Default: INPUT_PULLUP with switch wired between GPIO and GND.
+// In this default wiring, LOW means water is present.
+constexpr uint8_t TANK_SWITCH_PIN_MODE = INPUT_PULLUP;
+constexpr uint8_t TANK_WATER_PRESENT_LEVEL = LOW;
+
 enum SystemState {
   STATE_MONITORING = 0,
   STATE_WATERING = 1,

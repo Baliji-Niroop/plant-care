@@ -1,8 +1,23 @@
 # Simulation Validation Checklist
 
-This checklist records the current digital-twin evidence set.
+Use this checklist to validate only the Wokwi simulation behavior.
 
-## Status
+## Scope (read first)
+
+This checklist is for:
+- `simulation/wokwi/sketch.ino`
+
+This checklist is **not** for:
+- `firmware/firmware.ino` on physical hardware
+
+Intentional simulation differences:
+
+1. Relay is active-low in simulation.
+2. Soil mapping is linear (`0..4095 -> 0..100`).
+3. Production firmware uses calibrated soil mapping (`3950..1650 -> 0..100`).
+4. Simulation threshold is lower to make demos faster.
+
+## Scenario status
 
 - [x] Wet-soil hold
 - [x] Dry-soil watering
@@ -10,12 +25,12 @@ This checklist records the current digital-twin evidence set.
 - [x] System overview capture
 - [x] Cooldown behavior
 
-## Wet-soil hold
+## 1) Wet-soil hold
 
-Purpose:
-- Confirm the controller keeps the pump off when soil is already wet.
+Goal:
+- Pump should stay OFF when soil is wet.
 
-Expected telemetry:
+Expected serial pattern:
 
 ```text
 soil_raw=4095
@@ -24,58 +39,58 @@ pump=OFF
 decision=hold_soil_ok
 ```
 
-Success criteria:
-- Pump stays OFF across repeated loop cycles.
-- Decision remains `hold_soil_ok` while tank water is available.
+Pass condition:
+- Pump remains OFF over repeated loops.
+- Decision stays `hold_soil_ok` while tank is available.
 
-## Dry-soil watering
+## 2) Dry-soil watering
 
-Purpose:
-- Confirm watering starts when moisture drops below the threshold and the tank is available.
+Goal:
+- Pump should start when soil is dry and tank is available.
 
-Procedure:
-1. Open the simulator and start serial monitoring.
-2. Lower the soil input until moisture falls below the threshold.
-3. Confirm the pump state changes to ON.
+Steps:
+1. Open simulator and serial monitor.
+2. Lower soil input until moisture is below threshold.
+3. Confirm pump becomes ON.
 
-Expected telemetry:
+Expected serial pattern:
 
 ```text
 decision=watering_start
 pump=ON
 ```
 
-## Tank-empty interlock
+## 3) Tank-empty interlock
 
-Purpose:
-- Confirm tank-empty status overrides a dry-soil request.
+Goal:
+- Tank-empty must block watering even if soil is dry.
 
-Procedure:
-1. Keep the soil dry condition active.
-2. Set the tank input to empty.
+Steps:
+1. Keep dry-soil condition active.
+2. Set tank switch to empty.
 3. Confirm watering is blocked.
 
-Expected telemetry:
+Expected serial pattern:
 
 ```text
 decision=hold_tank_empty
 pump=OFF
 ```
 
-## System overview
+## 4) System overview capture
 
-Purpose:
-- Capture one complete simulator state for documentation.
+Goal:
+- Capture one clean full-system screenshot for records.
 
-Procedure:
-1. Reset the simulator into a stable state.
-2. Keep the major components visible.
-3. Include the serial monitor if it remains readable.
+Steps:
+1. Reset simulator to stable state.
+2. Keep major components visible.
+3. Include serial monitor if readable.
 
-## Cooldown behavior
+## 5) Cooldown behavior
 
-Purpose:
-- Confirm the anti-chatter cooldown after watering.
+Goal:
+- Confirm cooldown blocks immediate retrigger after watering.
 
 Expected sequence:
 
@@ -85,16 +100,17 @@ ACTION: watering_stop -> cooldown_start
 ACTION: cooldown_end
 ```
 
-## Evidence bundle
+## Evidence to save
 
 Required:
-- Completed checklist for the scenarios above
-- Serial excerpts for watering start and tank interlock hold
+- Completed checklist
+- Serial excerpt for watering start
+- Serial excerpt for tank-empty hold
 
 Recommended:
-- Serial excerpt for cooldown behavior
+- Serial excerpt for cooldown sequence
 
-## Validation run log
+## Latest run summary
 
 Date: 2026-04-09
 
@@ -103,6 +119,6 @@ Date: 2026-04-09
 - Simulator start trigger: PASS
 
 Notes:
-- Firmware size: 292624 bytes (22%).
-- Global memory: 22252 bytes (6%).
-- ESP32 BT pragma note appears during compile and is informational (not an error).
+- Firmware size: 292624 bytes (22%)
+- Global memory: 22252 bytes (6%)
+- ESP32 BT pragma messages are informational, not errors
