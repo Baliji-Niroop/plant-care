@@ -18,6 +18,7 @@ class Sensors {
   DHT dht_;
   int dhtErrorCount_;
   bool lastTankState_;
+  bool lastRawTankState_;
   unsigned long tankDebounceStart_;
 
   // Calibration values for the capacitive soil sensor.
@@ -30,12 +31,18 @@ class Sensors {
       : dht_(PIN_DHT, DHT_SENSOR_TYPE),
         dhtErrorCount_(0),
         lastTankState_(false),
+        lastRawTankState_(false),
         tankDebounceStart_(0) {}
 
   void begin() {
     analogReadResolution(12);
 
     pinMode(PIN_TANK_SWITCH, TANK_SWITCH_PIN_MODE);
+
+    const bool initialTankState = digitalRead(PIN_TANK_SWITCH) == TANK_WATER_PRESENT_LEVEL;
+    lastTankState_ = initialTankState;
+    lastRawTankState_ = initialTankState;
+    tankDebounceStart_ = millis();
 
     dht_.begin();
 
@@ -64,11 +71,12 @@ class Sensors {
 
     // Debounce float switch changes to avoid slosh spikes.
     const bool currentTankState = digitalRead(PIN_TANK_SWITCH) == TANK_WATER_PRESENT_LEVEL;
-    if (currentTankState != lastTankState_) {
+    if (currentTankState != lastRawTankState_) {
+      lastRawTankState_ = currentTankState;
       tankDebounceStart_ = millis();
     }
-    if (millis() - tankDebounceStart_ > TANK_DEBOUNCE_MS) {
-      lastTankState_ = currentTankState;
+    if ((millis() - tankDebounceStart_) > TANK_DEBOUNCE_MS && lastTankState_ != lastRawTankState_) {
+      lastTankState_ = lastRawTankState_;
     }
     data.tankHasWater = lastTankState_;
 
