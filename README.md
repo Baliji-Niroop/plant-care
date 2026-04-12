@@ -1,5 +1,7 @@
 # ESP32 Smart Plant Care
 
+![System architecture](assets/diagrams/system-architecture.svg)
+
 An ESP32-based smart irrigation project that waters plants only when soil is dry and operating conditions are safe.
 
 This repository is organized for both learning and engineering review:

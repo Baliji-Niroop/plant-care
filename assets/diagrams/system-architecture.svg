@@ -1,0 +1,109 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 450" width="1200" height="450">
+  <defs>
+    <linearGradient id="grad1" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#e0f2fe;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#bae6fd;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="grad2" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#ddd6fe;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#c4b5fd;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="grad3" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#dcfce7;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#bbf7d0;stop-opacity:1" />
+    </linearGradient>
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.15"/>
+    </filter>
+    <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <polygon points="0 0, 10 3, 0 6" fill="#64748b" />
+    </marker>
+  </defs>
+  
+  <rect width="1200" height="450" fill="#ffffff"/>
+  
+  <!-- Title Section -->
+  <rect x="0" y="0" width="1200" height="60" fill="#0f172a"/>
+  <text x="60" y="40" font-size="28" font-weight="700" fill="#ffffff" font-family="Inter, sans-serif">ESP32 Smart Plant Care System</text>
+  
+  <!-- Subtitle -->
+  <text x="60" y="420" font-size="12" fill="#64748b" font-family="Inter, sans-serif">GPIO34 (Soil) • GPIO4 (DHT22) • GPIO5 (Tank) → ESP32 Logic → GPIO18 (Relay)</text>
+  
+  <!-- SENSOR INPUTS (LEFT) -->
+  <g filter="url(#shadow)">
+    <!-- Soil Sensor -->
+    <rect x="40" y="90" width="140" height="110" rx="8" fill="url(#grad1)" stroke="#0284c7" stroke-width="2"/>
+    <text x="110" y="125" font-size="16" font-weight="700" fill="#0c4a6e" text-anchor="middle" font-family="Inter, sans-serif">Soil Sensor</text>
+    <text x="110" y="148" font-size="13" fill="#075985" text-anchor="middle" font-family="Inter, sans-serif">GPIO34 ADC</text>
+    <text x="110" y="170" font-size="11" fill="#0284c7" text-anchor="middle" font-family="Inter, sans-serif">0–4095 → 0–100%</text>
+    <text x="110" y="190" font-size="10" fill="#0c4a6e" text-anchor="middle" font-family="Inter, sans-serif" font-weight="600">Threshold: 60%</text>
+    
+    <!-- DHT22 -->
+    <rect x="40" y="220" width="140" height="130" rx="8" fill="url(#grad1)" stroke="#0284c7" stroke-width="2"/>
+    <text x="110" y="257" font-size="16" font-weight="700" fill="#0c4a6e" text-anchor="middle" font-family="Inter, sans-serif">DHT22 Sensor</text>
+    <text x="110" y="280" font-size="13" fill="#075985" text-anchor="middle" font-family="Inter, sans-serif">GPIO4 I2C-like</text>
+    <text x="110" y="302" font-size="11" fill="#0284c7" text-anchor="middle" font-family="Inter, sans-serif">Temp: 15–40°C</text>
+    <text x="110" y="322" font-size="11" fill="#0284c7" text-anchor="middle" font-family="Inter, sans-serif">Humidity ≥ 30%</text>
+  </g>
+  
+  <!-- Tank Switch -->
+  <g filter="url(#shadow)">
+    <rect x="40" y="370" width="140" height="50" rx="8" fill="url(#grad1)" stroke="#0284c7" stroke-width="2"/>
+    <text x="110" y="392" font-size="16" font-weight="700" fill="#0c4a6e" text-anchor="middle" font-family="Inter, sans-serif">Tank Switch</text>
+    <text x="110" y="412" font-size="11" fill="#075985" text-anchor="middle" font-family="Inter, sans-serif">GPIO5 (LOW = water OK)</text>
+  </g>
+  
+  <!-- ESP32 LOGIC (CENTER) -->
+  <g filter="url(#shadow)">
+    <rect x="250" y="90" width="280" height="330" rx="8" fill="url(#grad2)" stroke="#7c3aed" stroke-width="2.5"/>
+    
+    <text x="390" y="125" font-size="18" font-weight="700" fill="#5b21b6" text-anchor="middle" font-family="Inter, sans-serif">ESP32 Decision Logic</text>
+    <line x1="270" y1="135" x2="510" y2="135" stroke="#9d8cd4" stroke-width="1.5"/>
+    
+    <text x="390" y="165" font-size="12" font-weight="600" fill="#5b21b6" text-anchor="middle" font-family="Inter, sans-serif">7-Stage Safety Checks:</text>
+    
+    <text x="270" y="195" font-size="11" fill="#5b21b6" font-family="Inter, sans-serif">① Sensor frame valid</text>
+    <text x="270" y="215" font-size="11" fill="#5b21b6" font-family="Inter, sans-serif">② Soil dry &lt; 60%</text>
+    <text x="270" y="235" font-size="11" fill="#5b21b6" font-family="Inter, sans-serif">③ Debounce ≥ 3 reads</text>
+    <text x="270" y="255" font-size="11" fill="#5b21b6" font-family="Inter, sans-serif">④ Temp 15–40°C</text>
+    <text x="270" y="275" font-size="11" fill="#5b21b6" font-family="Inter, sans-serif">⑤ Humidity ≥ 30%</text>
+    <text x="270" y="295" font-size="11" fill="#5b21b6" font-family="Inter, sans-serif">⑥ Tank has water</text>
+    <text x="270" y="315" font-size="11" fill="#5b21b6" font-family="Inter, sans-serif">⑦ Cooldown expired</text>
+    
+    <line x1="270" y1="330" x2="510" y2="330" stroke="#9d8cd4" stroke-width="1.5"/>
+    
+    <rect x="275" y="345" width="230" height="50" rx="6" fill="#f3e8ff" stroke="#c4b5fd" stroke-width="1.5"/>
+    <text x="390" y="368" font-size="12" font-weight="700" fill="#5b21b6" text-anchor="middle" font-family="Inter, sans-serif">All Checks PASS</text>
+    <text x="390" y="385" font-size="11" fill="#7c3aed" text-anchor="middle" font-family="Inter, sans-serif">→ Activate Pump (5000ms)</text>
+  </g>
+  
+  <!-- OUTPUTS (RIGHT) -->
+  <g filter="url(#shadow)">
+    <!-- Relay -->
+    <rect x="600" y="140" width="140" height="100" rx="8" fill="url(#grad3)" stroke="#16a34a" stroke-width="2"/>
+    <text x="670" y="175" font-size="16" font-weight="700" fill="#15803d" text-anchor="middle" font-family="Inter, sans-serif">Relay Module</text>
+    <text x="670" y="198" font-size="13" fill="#166534" text-anchor="middle" font-family="Inter, sans-serif">GPIO18</text>
+    <text x="670" y="220" font-size="11" fill="#166534" text-anchor="middle" font-family="Inter, sans-serif">HIGH = ON</text>
+    
+    <!-- Pump -->
+    <rect x="820" y="140" width="140" height="100" rx="8" fill="url(#grad3)" stroke="#16a34a" stroke-width="2"/>
+    <text x="890" y="175" font-size="16" font-weight="700" fill="#15803d" text-anchor="middle" font-family="Inter, sans-serif">Pump Motor</text>
+    <text x="890" y="198" font-size="13" fill="#166534" text-anchor="middle" font-family="Inter, sans-serif">5V DC</text>
+    <text x="890" y="220" font-size="11" fill="#166534" text-anchor="middle" font-family="Inter, sans-serif">Runtime: 5000ms</text>
+    
+    <!-- Safety Info -->
+    <rect x="600" y="270" width="360" height="110" rx="8" fill="#fffbeb" stroke="#fbbf24" stroke-width="1.5"/>
+    <text x="780" y="295" font-size="13" font-weight="700" fill="#92400e" text-anchor="middle" font-family="Inter, sans-serif">Production Calibration</text>
+    <text x="610" y="320" font-size="11" fill="#b45309" font-family="Inter, sans-serif">• Dry ADC: 3950 (100%)</text>
+    <text x="610" y="340" font-size="11" fill="#b45309" font-family="Inter, sans-serif">• Wet ADC: 1650 (0%)</text>
+    <text x="610" y="360" font-size="11" fill="#b45309" font-family="Inter, sans-serif">• Cooldown: 60000ms</text>
+    <text x="610" y="380" font-size="11" fill="#b45309" font-family="Inter, sans-serif">• Watchdog: 10000ms</text>
+  </g>
+  
+  <!-- ARROWS -->
+  <path d="M 180 145 Q 220 140 250 160" stroke="#64748b" stroke-width="2.5" fill="none" marker-end="url(#arrowhead)"/>
+  <path d="M 180 285 Q 220 280 250 270" stroke="#64748b" stroke-width="2.5" fill="none" marker-end="url(#arrowhead)"/>
+  <path d="M 180 395 Q 220 380 250 310" stroke="#64748b" stroke-width="2.5" fill="none" marker-end="url(#arrowhead)"/>
+  <path d="M 530 190 Q 560 180 600 190" stroke="#64748b" stroke-width="2.5" fill="none" marker-end="url(#arrowhead)"/>
+  <path d="M 740 190 Q 780 180 820 190" stroke="#64748b" stroke-width="2.5" fill="none" marker-end="url(#arrowhead)"/>
+</svg>
