@@ -1,13 +1,16 @@
 #include <Arduino.h>
 #include <DHTesp.h>
 
-// Pin map
+// Simulation-only firmware for local Wokwi validation.
+// Production hardware uses firmware/firmware.ino.
+
+// Simulation pin map
 static const uint8_t PIN_DHT = 4;
 static const uint8_t PIN_SOIL = 34;
 static const uint8_t PIN_TANK_SWITCH = 5;
 static const uint8_t PIN_RELAY = 18;
 
-// Control tuning
+// Simulation control tuning
 // Lower threshold (35%) for easier simulation demos vs production firmware (60%).
 // This makes watering cycles happen faster while validating behavior.
 static const int MOISTURE_THRESHOLD_PERCENT = 35;   // Start watering below this moisture level
@@ -25,7 +28,7 @@ unsigned long cooldownStartedAt = 0;
 unsigned long lastLoopAt = 0;
 String lastDecision = "boot";
 
-// Sensor snapshot for one control cycle
+// Sensor snapshot for one control cycle.
 struct SensorFrame {
   float temperatureC;
   float humidityPercent;
@@ -35,7 +38,7 @@ struct SensorFrame {
   bool dhtValid;
 };
 
-// Sensor readout
+// Read one sensor frame from simulated inputs.
 SensorFrame readSensors() {
   SensorFrame s{};
 
@@ -56,10 +59,10 @@ SensorFrame readSensors() {
   return s;
 }
 
-// Pump control
+// Pump control abstraction.
 void setPump(bool on) {
   pumpOn = on;
-  // Wokwi relay module is active-low (opposite of modular firmware active-high default).
+  // Wokwi relay module is active-low (opposite of production firmware active-high default).
   // Production config uses RELAY_ON=HIGH, but Wokwi relay expects LOW=ON.
   digitalWrite(PIN_RELAY, on ? LOW : HIGH);
 }
@@ -79,7 +82,7 @@ void stopWateringAndCooldown(unsigned long now) {
   Serial.println("ACTION: watering_stop -> cooldown_start");
 }
 
-// Decision logic and cooldown
+// Decision logic and cooldown handling.
 void updateIrrigation(const SensorFrame &s, unsigned long now) {
   if (pumpOn) {
     // Safety timeout if the pump runs too long.
@@ -123,7 +126,7 @@ void updateIrrigation(const SensorFrame &s, unsigned long now) {
   }
 }
 
-// Telemetry output
+// Serial telemetry output.
 void printTelemetry(const SensorFrame &s, unsigned long now) {
   Serial.print("t_ms=");
   Serial.print(now);

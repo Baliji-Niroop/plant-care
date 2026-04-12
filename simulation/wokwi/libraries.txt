@@ -1,2 +1,3 @@
+# Required Arduino libraries for local Wokwi simulation
 DHT sensor library for ESPx
 DHTesp

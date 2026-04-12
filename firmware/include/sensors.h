@@ -21,7 +21,7 @@ class Sensors {
   bool lastRawTankState_;
   unsigned long tankDebounceStart_;
 
-  // Calibration values for the capacitive soil sensor.
+  // Production calibration references for the capacitive soil sensor.
   static constexpr int SOIL_RAW_DRY = 3950;
   static constexpr int SOIL_RAW_WET = 1650;
   static constexpr unsigned long TANK_DEBOUNCE_MS = 50UL;
@@ -46,7 +46,7 @@ class Sensors {
 
     dht_.begin();
 
-    // Allow a short warm-up for the DHT sensor.
+    // Allow DHT startup stabilization.
     delay(1500);
   }
 
@@ -54,7 +54,7 @@ class Sensors {
     SensorData data{};
     data.validReading = true;
 
-    // Convert raw ADC to approximate moisture percentage.
+    // Convert raw ADC to moisture percentage using calibrated dry/wet points.
     const int rawSoil = analogRead(PIN_SOIL_SENSOR);
     data.soilMoisturePercent = static_cast<float>(map(rawSoil, SOIL_RAW_DRY, SOIL_RAW_WET, 0, 100));
     data.soilMoisturePercent = constrain(data.soilMoisturePercent, 0.0f, 100.0f);
@@ -69,7 +69,7 @@ class Sensors {
       dhtErrorCount_ = 0;
     }
 
-    // Debounce float switch changes to avoid slosh spikes.
+    // Debounce float-switch transitions to suppress slosh noise.
     const bool currentTankState = digitalRead(PIN_TANK_SWITCH) == TANK_WATER_PRESENT_LEVEL;
     if (currentTankState != lastRawTankState_) {
       lastRawTankState_ = currentTankState;
@@ -84,7 +84,7 @@ class Sensors {
   }
 
   bool healthy() const {
-    return dhtErrorCount_ < 3;  // Allow up to two transient failures.
+    return dhtErrorCount_ < 3;  // Allow up to two transient failures before error handling.
   }
 };
 

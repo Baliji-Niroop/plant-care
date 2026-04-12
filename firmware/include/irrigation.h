@@ -67,7 +67,7 @@ class IrrigationController {
     decision.cooldownExpired = false;
     decision.reason = "Sensor read failed";
 
-    // Fail-safe: never water on an invalid sensor frame.
+    // Fail-safe rule: never water on an invalid sensor frame.
     if (!data.validReading) {
       return decision;
     }
@@ -139,7 +139,7 @@ class IrrigationController {
 
     const unsigned long elapsed = millis() - pumpStartTime_;
 
-    // Hard stop if the pump runs longer than expected.
+    // Hard-stop protection if runtime exceeds watchdog limit.
     if (elapsed >= PUMP_WATCHDOG_MS) {
       emergencyStop();
       return;

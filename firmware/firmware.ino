@@ -1,5 +1,5 @@
-// ESP32 smart plant irrigation (modular firmware)
-// Connects sensors, control logic, and telemetry.
+// ESP32 smart plant care production firmware.
+// Coordinates sensing, irrigation decisions, safety checks, and telemetry.
 
 #include "include/config.h"
 #include "include/sensors.h"
@@ -36,21 +36,21 @@ void setup() {
   sensors.begin();
   irrigation.begin();
 
-  Serial.println("[init] Modular firmware online");
+  Serial.println("[init] Production firmware online");
 }
 
 void loop() {
-  // Run safety checks first.
+  // Keep pump safety enforcement active on every loop.
   irrigation.update();
 
-  // Read sensors on a fixed interval.
+  // Read and evaluate sensors at a fixed interval.
   const bool dueForRead = (millis() - lastSensorReadMs) >= SENSOR_READ_INTERVAL_MS;
   if (dueForRead) {
     currentData = sensors.read();
     lastSensorReadMs = millis();
     lastDecision = irrigation.evaluate(currentData);
 
-    // Enter error mode only after repeated sensor failures.
+    // Transition to error only after repeated sensor-health failures.
     if (!sensors.healthy()) {
       setSystemState(STATE_ERROR);
     }

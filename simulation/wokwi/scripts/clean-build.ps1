@@ -1,3 +1,7 @@
+# Purpose:
+# - Remove generated simulation build artifacts.
+# - Recreate build directory and preserve .gitkeep for repository cleanliness.
+
 $ErrorActionPreference = "Stop"
 
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path

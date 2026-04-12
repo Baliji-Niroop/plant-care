@@ -1,65 +1,71 @@
 # Local Wokwi Simulation
 
-This folder is the software-only test environment for quick checks in VS Code.
+This folder provides the software-only validation environment for quick behavior testing in VS Code.
 
-## Files in this folder
+## 1. Folder contents
 
-- `diagram.json`: Wokwi circuit connections
+- `diagram.json`: Wokwi circuit definition
 - `sketch.ino`: simulation firmware (single-file)
-- `wokwi.toml`: simulator config (firmware path, elf path, license key)
+- `wokwi.toml`: firmware/ELF paths and Wokwi license key
 - `libraries.txt`: required Arduino libraries
-- `scripts/`: build/clean/start helper scripts
+- `scripts/`: build, clean, and simulator-start helper scripts
 - `build/`: generated build outputs
 
-## What the simulation includes
+## 2. What simulation models
 
-- DHT22 temperature + humidity
-- Soil moisture analog input
-- Tank switch input
-- Relay output (pump indicator)
-- Serial logs at 115200 baud
+- DHT22 temperature and humidity input
+- soil moisture analog input
+- tank switch state input
+- relay output used as pump indicator
+- serial telemetry at 115200 baud
 
-## Important: simulation is not hardware firmware
+## 3. Simulation boundary
 
-`simulation/wokwi/sketch.ino` is tuned for simulation speed and behavior demos.
-Real hardware uses `firmware/firmware.ino`.
+Use this file only for simulation:
 
-Key differences:
+- `simulation/wokwi/sketch.ino`
 
-1. Relay logic in simulation is active-low (`LOW = ON`) because of Wokwi relay behavior.
-2. Moisture mapping in simulation is linear (`0..4095 -> 0..100`).
-3. Production firmware uses calibrated mapping (`3950..1650 -> 0..100`).
-4. Simulation dry threshold is lower (`35%`) than production (`60%`).
+Use this file for physical hardware:
 
-Do not flash the simulation sketch to physical ESP32 hardware.
+- `firmware/firmware.ino`
 
-## Build steps
+Do not flash the simulation sketch to real hardware.
 
-1. Install `arduino-cli` and add it to `PATH`.
-2. Install dependencies:
-   - `arduino-cli core update-index`
-   - `arduino-cli core install esp32:esp32@3.3.7`
-   - `arduino-cli lib install "DHT sensor library for ESPx"`
-   - `arduino-cli lib install "DHTesp"`
-3. Add your Wokwi key in `wokwi.toml`:
-   - `wokwi_license = "YOUR_WOKWI_LICENSE_KEY"`
-4. Build using VS Code task **Wokwi: Build Firmware**  
-   or run `scripts\build-firmware.ps1`.
+## 4. Intentional simulation differences
 
-Build output:
+These differences are expected and already implemented:
 
-- `build\sketch.ino.bin`
-- `build\sketch.ino.elf`
+1. relay control is active-low in simulation (`LOW = ON`)
+2. moisture mapping is linear (`0..4095 -> 0..100`)
+3. production firmware uses calibrated mapping (`3950..1650 -> 0..100`)
+4. simulation dry threshold is lower (`35%`) than production (`60%`)
+5. simulation cooldown is shorter for faster demos (`15000 ms` vs production `60000 ms`)
 
-## Run steps
+## 5. Build workflow
 
-1. Build first.
-2. Open `simulation\wokwi` in VS Code.
-3. Start **Wokwi: Start Simulator**.
+1. Install Arduino CLI and ensure it is available in PATH.
+2. Install dependencies listed in `libraries.txt`.
+3. Set `wokwi_license` in `wokwi.toml`.
+4. Run VS Code task `Wokwi: Build Firmware` or run `scripts/build-firmware.ps1`.
 
-## Basic checks after start
+Expected outputs:
 
-- Dry soil should start watering when tank is available.
-- Tank empty should block watering.
-- Cooldown should stop immediate retrigger.
-- Serial output should match current state.
+- `build/sketch.ino.bin`
+- `build/sketch.ino.elf`
+
+## 6. Start workflow
+
+1. Build simulation firmware.
+2. Run VS Code task `Wokwi: Start Simulator`.
+3. Open serial monitor and observe telemetry.
+
+## 7. Validation workflow
+
+After startup, validate:
+
+- wet-soil hold behavior
+- dry-soil watering behavior
+- tank-empty interlock behavior
+- cooldown behavior
+
+Use `../../docs/validation/simulation-validation-checklist.md` for the formal scenario checklist.

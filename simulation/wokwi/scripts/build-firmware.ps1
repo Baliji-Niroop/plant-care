@@ -3,6 +3,11 @@ param(
   [switch]$Bootstrap
 )
 
+# Purpose:
+# - Compile simulation/wokwi/sketch.ino with Arduino CLI.
+# - Produce build/sketch.ino.bin and build/sketch.ino.elf for Wokwi runtime.
+# - Optional bootstrap installs core/libraries used by this repository.
+
 $ErrorActionPreference = "Stop"
 
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path

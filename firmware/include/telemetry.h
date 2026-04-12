@@ -97,6 +97,7 @@ class Telemetry {
                       const IrrigationDecision& decision,
                       SystemState state,
                       const IrrigationController& controller) {
+    // Keep reporting interval fixed to avoid serial flooding.
     if (millis() - lastReportMs_ < TELEMETRY_INTERVAL_MS) {
       return;
     }

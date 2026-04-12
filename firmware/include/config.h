@@ -3,16 +3,16 @@
 
 #include <Arduino.h>
 
-// ESP32 DevKit V1 pin map
+// Production firmware pin map (ESP32 DevKit V1)
 constexpr uint8_t PIN_SOIL_SENSOR = 34;   // Analog input, ADC1_CH6
 constexpr uint8_t PIN_DHT = 4;            // DHT data
 constexpr uint8_t PIN_TANK_SWITCH = 5;    // Float switch
 constexpr uint8_t PIN_RELAY = 18;         // Relay input
 
-// Keep this numeric so config.h does not depend on DHT.h include order.
+// Kept numeric to avoid include-order dependency on DHT headers.
 constexpr uint8_t DHT_SENSOR_TYPE = 22;
 
-// Control thresholds
+// Decision thresholds
 constexpr int SOIL_DRY_THRESHOLD_PERCENT = 60;
 
 constexpr float TEMP_MIN_C = 15.0f;
@@ -22,7 +22,7 @@ constexpr float HUMIDITY_MIN_PERCENT = 30.0f;
 // Require several dry readings to filter noise.
 constexpr uint8_t DECISION_DEBOUNCE_READINGS = 3;
 
-// Timing
+// Timing constants
 constexpr unsigned long SENSOR_READ_INTERVAL_MS = 2000UL;
 constexpr unsigned long PUMP_ON_DURATION_MS = 5000UL;
 constexpr unsigned long PUMP_COOLDOWN_MS = 60000UL;
@@ -31,7 +31,7 @@ constexpr unsigned long TELEMETRY_INTERVAL_MS = 3000UL;
 
 constexpr int SERIAL_BAUD_RATE = 115200;
 
-// Relay polarity. Swap if your relay is active-low.
+// Relay polarity for physical hardware. Swap if your relay is active-low.
 constexpr uint8_t RELAY_ON = HIGH;
 constexpr uint8_t RELAY_OFF = LOW;
 

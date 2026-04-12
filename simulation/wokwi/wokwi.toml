@@ -1,5 +1,9 @@
 [wokwi]
 version = 1
+
+# Firmware artifacts produced by scripts/build-firmware.ps1
 firmware = "build/sketch.ino.bin"
 elf = "build/sketch.ino.elf"
+
+# Set your personal or team Wokwi license key before running the simulator.
 wokwi_license = "YOUR_WOKWI_LICENSE_KEY"

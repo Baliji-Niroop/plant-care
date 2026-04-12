@@ -1,2 +1,5 @@
+# Ignore generated simulation build artifacts.
 simulation/wokwi/build/*
+
+# Keep directory structure tracked in Git.
 !simulation/wokwi/build/.gitkeep

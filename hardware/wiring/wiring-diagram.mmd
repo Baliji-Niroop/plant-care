@@ -64,8 +64,8 @@ flowchart LR
 
   PSU_N --- GND
 
-  note1["Default firmware tank mode:\nINPUT_PULLUP + TANK_WATER_PRESENT_LEVEL=LOW"]:::note
-  note2["Relay ON/OFF polarity is module-dependent.\nSet RELAY_ON/RELAY_OFF in firmware/include/config.h"]:::note
+  note1["Production default tank mode:\nINPUT_PULLUP + TANK_WATER_PRESENT_LEVEL=LOW"]:::note
+  note2["Relay ON/OFF polarity depends on module type.\nSet RELAY_ON/RELAY_OFF in firmware/include/config.h"]:::note
 
   note1 -.-> GPIO5
   note2 -.-> GPIO18

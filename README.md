@@ -1,79 +1,175 @@
-# ESP32 Smart Plant Irrigation
+# ESP32 Smart Plant Care
 
-This project is an automatic plant watering system built with ESP32.
-It includes:
+An ESP32-based smart irrigation project that waters plants only when soil is dry and operating conditions are safe.
 
-- production firmware in `firmware/`
-- a Wokwi simulator in `simulation/wokwi/`
-- validation notes in `docs/`
-- hardware build docs in `hardware/`
+This repository is organized for both learning and engineering review:
 
-## How it works
+- beginner-friendly simulation workflow
+- hardware-ready firmware workflow
+- documented safety logic and validation evidence
 
-The pump turns on only when all conditions are safe:
+## Problem statement
 
-1. Soil is dry enough.
-2. Tank has water.
-3. Cooldown time is over.
-4. Pump runtime is still inside watchdog limit.
+Manual watering is inconsistent. Plants are often overwatered or underwatered because moisture level, environmental condition, and tank availability are not checked together before pumping.
 
-If sensor data is invalid, firmware chooses **HOLD** (safe behavior).
+## Why smart irrigation is needed
 
-## Quick simulation setup
+Smart irrigation reduces avoidable watering errors by making the pump decision from measured inputs instead of guesswork. This project focuses on a small, practical implementation:
 
-1. Install tools and libraries:
-   - `arduino-cli core update-index`
-   - `arduino-cli core install esp32:esp32@3.3.7`
-   - `arduino-cli lib install "DHT sensor library for ESPx"`
-   - `arduino-cli lib install "DHTesp"`
-2. Open `simulation/wokwi/wokwi.toml` and set:
-   - `wokwi_license = "YOUR_WOKWI_LICENSE_KEY"`
-3. Run VS Code task: **Wokwi: Build Firmware**
-4. Run VS Code task: **Wokwi: Start Simulator**
-5. Check output files:
-   - `simulation/wokwi/build/sketch.ino.bin`
-   - `simulation/wokwi/build/sketch.ino.elf`
+- soil moisture indicates when watering may be needed
+- temperature and humidity are checked for safe conditions
+- tank level interlock prevents dry running
+- cooldown and watchdog protections reduce pump stress
 
-## Very important before hardware flashing
+## What this system does
 
-- Flash only: `firmware/firmware.ino`
-- Do **not** flash: `simulation/wokwi/sketch.ino` (simulation-only)
+The controller reads four inputs and decides whether to water:
 
-Before flashing, confirm `firmware/include/config.h`:
+1. Soil moisture (analog)
+2. Temperature (DHT22)
+3. Humidity (DHT22)
+4. Tank water availability (float switch)
 
-- relay polarity:
-  - `RELAY_ON`
-  - `RELAY_OFF`
-- tank switch polarity:
-  - `TANK_SWITCH_PIN_MODE`
-  - `TANK_WATER_PRESENT_LEVEL`
+The pump relay is activated only when all decision conditions pass.
 
-Default tank wiring is `INPUT_PULLUP` with switch between GPIO 5 and GND, so water-present level is `LOW`.
+## Required components
 
-## Main tuning values
+Only components already used by this repository are listed:
 
-All in `firmware/include/config.h`:
+- ESP32 DevKit V1
+- Capacitive soil moisture sensor
+- DHT22 temperature and humidity sensor
+- Float switch (tank level)
+- 1-channel relay module
+- 5V DC mini pump
+- External 5V supply for pump and relay
+- Common wiring accessories (breadboard, jumpers, tubing)
 
-- `SOIL_DRY_THRESHOLD_PERCENT`
-- `DECISION_DEBOUNCE_READINGS`
-- `PUMP_ON_DURATION_MS`
-- `PUMP_COOLDOWN_MS`
-- `PUMP_WATCHDOG_MS`
+For cost and sourcing notes, see `hardware/components/bom.txt`.
 
-## Validation checklist
+## Working principle
 
-Use `docs/simulation-validation-checklist.md` to verify:
+### Sensor input flow
 
-- wet-soil hold
-- dry-soil watering
+1. ESP32 reads soil ADC on GPIO34.
+2. ESP32 reads temperature and humidity from DHT22 on GPIO4.
+3. ESP32 reads tank switch state on GPIO5.
+4. Sensor frame is marked valid or invalid.
+
+### Decision logic flow
+
+Watering is allowed only when:
+
+- sensor frame is valid
+- soil is below dry threshold
+- dry reading debounce has passed
+- temperature and humidity are within configured limits
+- tank reports water available
+- cooldown has expired
+
+If any condition fails, action is HOLD.
+
+### Pump activation flow
+
+When a watering decision is true:
+
+1. Relay output is set to ON polarity.
+2. Pump runs for configured duration.
+3. Pump stops and cooldown starts.
+4. During run, watchdog can force emergency stop if runtime exceeds limit.
+
+## Implemented safety checks
+
+- fail-safe hold on invalid sensor data
 - tank-empty interlock
-- cooldown behavior
+- debounce for dry-soil decision
+- environment range check (temperature and humidity)
+- cooldown lockout between cycles
+- watchdog hard stop for pump runtime
+- error state handling with forced pump OFF
 
-## Project structure
+## Simulation and hardware workflows
+
+### Simulation workflow (recommended first)
+
+Use the local Wokwi setup in `simulation/wokwi/`.
+
+1. Install Arduino CLI and required core/libraries.
+2. Set `wokwi_license` in `simulation/wokwi/wokwi.toml`.
+3. Run task: `Wokwi: Build Firmware`.
+4. Run task: `Wokwi: Start Simulator`.
+5. Validate behavior with `docs/validation/simulation-validation-checklist.md`.
+
+### Real hardware workflow
+
+1. Assemble hardware using `hardware/wiring/build-guide.md`.
+2. Flash only `firmware/firmware.ino`.
+3. Verify relay and tank polarity settings in `firmware/include/config.h`.
+4. Run scenario tests (dry, wet, tank empty, cooldown).
+
+Important: `simulation/wokwi/sketch.ino` is simulation-only and must not be flashed to physical hardware.
+
+## Calibration workflow
+
+Production firmware uses calibrated soil mapping values:
+
+- dry reference: 3950
+- wet reference: 1650
+
+Calibration guidance is documented in `docs/calibration/calibration.md`.
+
+## Validation process and expected outputs
+
+Validation is scenario-based and uses serial telemetry as evidence.
+
+Expected outcomes:
+
+- wet soil keeps pump OFF
+- dry soil with safe conditions starts watering
+- tank empty blocks watering
+- cooldown prevents immediate retrigger
+- watchdog prevents excessive runtime
+
+Use `docs/validation/simulation-validation-checklist.md` for structured checks.
+
+## Repository structure
 
 | Path | Purpose |
 |---|---|
-| `firmware/` | Real hardware firmware |
-| `simulation/wokwi/` | Local simulator and scripts |
-| `docs/` | Test checklist and notes |
-| `hardware/` | Wiring and assembly documentation |
+| `firmware/` | Production firmware and headers for physical ESP32 hardware |
+| `simulation/wokwi/` | Local Wokwi simulation sketch, circuit, and helper scripts |
+| `docs/architecture/` | System architecture documentation |
+| `docs/calibration/` | Calibration and threshold guidance |
+| `docs/deployment/` | Deployment and workflow documentation |
+| `docs/validation/` | Validation checklists and expected outputs |
+| `docs/troubleshooting/` | Practical prototype troubleshooting notes |
+| `hardware/wiring/` | Wiring references and bench build guide |
+| `hardware/components/` | Hardware bill of materials |
+| `hardware/images/` | Hardware photos and captures |
+| `assets/` | Shared diagrams, screenshots, and demo images |
+| `.github/` | GitHub templates and repository automation metadata |
+
+## Known limitations
+
+Current repository limitations already present in code/docs:
+
+- simulation uses different relay polarity than production
+- simulation uses simplified moisture mapping and faster timing values
+- simulation threshold differs from production threshold for demo speed
+- current validation artifacts are focused on bench and simulator scenarios
+
+These are intentional and documented in `simulation/wokwi/README.md`.
+
+## Documentation map
+
+- `docs/architecture/architecture.md`: system modules, signal flow, state behavior
+- `docs/calibration/calibration.md`: soil calibration and threshold verification
+- `docs/deployment/deployment.md`: simulation and hardware deployment steps
+- `docs/deployment/workflow.md`: end-to-end workflow map
+- `docs/README.md`: documentation folder index
+- `CONTRIBUTING.md`: contribution and repository quality standards
+- `firmware/README.md`: firmware folder quick index
+- `simulation/README.md`: simulation folder quick index
+- `hardware/README.md`: hardware design reference
+- `hardware/wiring/build-guide.md`: assembly and bench verification
+- `docs/validation/simulation-validation-checklist.md`: simulation test checklist

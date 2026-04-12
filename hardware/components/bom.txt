@@ -1,0 +1,24 @@
+Plant Care Prototype - Component List (BOM)
+============================================
+
+Scope:
+- This list includes only components currently used by the repository workflows.
+
+Core components:
+- ESP32 Dev Board - Rs 450 (Robu.in)
+- Capacitive soil moisture sensor - Rs 150 (Amazon)
+- DHT22 temperature and humidity sensor - Rs 120 (local electronics shop)
+- Relay module (1-channel) - Rs 70 (Amazon)
+- Mini pump (3-6V DC) - Rs 200 (Amazon)
+- Float switch - Rs 100 (Amazon)
+
+Build accessories:
+- Jumper wires and breadboard - already available
+- USB cable and 5V adapter - reused phone charger
+
+Estimated total:
+- approximately Rs 1,090
+
+Notes:
+- A resistive soil probe was previously tested but replaced with a capacitive sensor because of corrosion behavior.
+- DHT22 is used to stay aligned with both production and simulation firmware assumptions.

@@ -1,3 +1,7 @@
+# Purpose:
+# - Attempt to trigger Wokwi simulator start through VS Code CLI.
+# - Fall back to clear manual instructions when CLI triggering is unavailable.
+
 $ErrorActionPreference = "Stop"
 
 $codeCommand = Get-Command code -ErrorAction SilentlyContinue
