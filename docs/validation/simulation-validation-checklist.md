@@ -24,6 +24,7 @@ Before running scenarios:
 - [x] Wet-soil hold
 - [x] Dry-soil watering
 - [x] Tank-empty interlock
+- [x] Environment safety hold
 - [x] System overview capture
 - [x] Cooldown behavior
 
@@ -88,7 +89,30 @@ Pass criteria:
 - watering does not start
 - decision remains `hold_tank_empty` while tank is empty
 
-## 4. System overview capture
+## 4. Environment safety hold
+
+Objective: out-of-range temperature or humidity blocks watering even when soil is dry and tank is available.
+
+Steps:
+
+1. Keep dry-soil condition active.
+2. Keep tank switch in the water-available state.
+3. Set temperature below `15 C`, above `40 C`, or humidity outside `30..80%`.
+4. Observe decision and pump fields.
+
+Expected serial pattern:
+
+```text
+decision=hold_env_unsafe
+pump=OFF
+```
+
+Pass criteria:
+
+- watering does not start
+- decision remains `hold_env_unsafe` while the environment is out of range
+
+## 5. System overview capture
 
 Objective: capture one clean full-system evidence image.
 
@@ -98,7 +122,7 @@ Steps:
 2. Keep circuit and serial monitor visible.
 3. Capture a screenshot with readable telemetry.
 
-## 5. Cooldown behavior
+## 6. Cooldown behavior
 
 Objective: verify cooldown prevents immediate retrigger.
 

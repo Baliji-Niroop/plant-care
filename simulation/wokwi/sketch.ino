@@ -14,6 +14,10 @@ static const uint8_t PIN_RELAY = 18;
 // Lower threshold (35%) for easier simulation demos vs production firmware (60%).
 // This makes watering cycles happen faster while validating behavior.
 static const int MOISTURE_THRESHOLD_PERCENT = 35;   // Start watering below this moisture level
+static const float TEMP_MIN_C = 15.0f;
+static const float TEMP_MAX_C = 40.0f;
+static const float HUMIDITY_MIN_PERCENT = 30.0f;
+static const float HUMIDITY_MAX_PERCENT = 80.0f;
 static const unsigned long WATERING_DURATION_MS = 6000;
 static const unsigned long WATERING_WATCHDOG_MS = 10000;
 static const unsigned long COOLDOWN_MS = 15000;
@@ -113,9 +117,23 @@ void updateIrrigation(const SensorFrame &s, unsigned long now) {
     }
   }
 
+  if (!s.dhtValid) {
+    lastDecision = "hold_sensor_invalid";
+    return;
+  }
+
   const bool isDry = s.moisturePercent < MOISTURE_THRESHOLD_PERCENT;
+  const bool envSafe = s.temperatureC >= TEMP_MIN_C &&
+                       s.temperatureC <= TEMP_MAX_C &&
+                       s.humidityPercent >= HUMIDITY_MIN_PERCENT &&
+                       s.humidityPercent <= HUMIDITY_MAX_PERCENT;
   if (!s.tankHasWater) {
     lastDecision = "hold_tank_empty";
+    return;
+  }
+
+  if (!envSafe) {
+    lastDecision = "hold_env_unsafe";
     return;
   }
 

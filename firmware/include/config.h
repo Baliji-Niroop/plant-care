@@ -18,6 +18,7 @@ constexpr int SOIL_DRY_THRESHOLD_PERCENT = 60;
 constexpr float TEMP_MIN_C = 15.0f;
 constexpr float TEMP_MAX_C = 40.0f;
 constexpr float HUMIDITY_MIN_PERCENT = 30.0f;
+constexpr float HUMIDITY_MAX_PERCENT = 80.0f;
 
 // Require several dry readings to filter noise.
 constexpr uint8_t DECISION_DEBOUNCE_READINGS = 3;

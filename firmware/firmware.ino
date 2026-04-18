@@ -87,7 +87,9 @@ void loop() {
         irrigation.stopPump();
         Serial.println("[safety] Pump forced off in error state");
       }
-      if (sensors.healthy()) {
+      if (irrigation.state() == PUMP_WATCHDOG_TRIGGERED) {
+        Serial.println("[fault] Watchdog lock active; reset controller to re-arm pump");
+      } else if (sensors.healthy()) {
         Serial.println("[info] sensors ok again");
         setSystemState(STATE_MONITORING);
       }

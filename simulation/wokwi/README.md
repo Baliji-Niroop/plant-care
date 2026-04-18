@@ -40,6 +40,7 @@ These differences are expected and already implemented:
 3. production firmware uses calibrated mapping (`3950..1650 -> 0..100`)
 4. simulation dry threshold is lower (`35%`) than production (`60%`)
 5. simulation cooldown is shorter for faster demos (`15000 ms` vs production `60000 ms`)
+6. simulation enforces the same temperature and humidity safety window as production (`15..40 C`, `30..80%`)
 
 ## 5. Build workflow
 
@@ -66,6 +67,7 @@ After startup, validate:
 - wet-soil hold behavior
 - dry-soil watering behavior
 - tank-empty interlock behavior
+- environment safety hold behavior
 - cooldown behavior
 
 Use `../../docs/validation/simulation-validation-checklist.md` for the formal scenario checklist.

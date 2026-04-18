@@ -41,7 +41,8 @@ class IrrigationController {
 
   bool isEnvSafe(float temperatureC, float humidityPercent) const {
     return temperatureC >= TEMP_MIN_C && temperatureC <= TEMP_MAX_C &&
-           humidityPercent >= HUMIDITY_MIN_PERCENT;
+           humidityPercent >= HUMIDITY_MIN_PERCENT &&
+           humidityPercent <= HUMIDITY_MAX_PERCENT;
   }
 
   bool inCooldown() const {
