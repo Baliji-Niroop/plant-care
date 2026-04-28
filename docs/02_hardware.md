@@ -8,4 +8,4 @@ For detailed component sourcing and wiring, see the [Hardware Directory](../hard
 - **Actuators**: 5V DC Pump driven via 1-Channel Relay
 - **Power**: Split rail power supply to prevent ESP32 brownouts during pump inrush.
 
-See the [Wiring Diagram](../hardware/wiring/wiring-diagram.png) for precise pin mappings.
+Refer to the [Wiring Diagram](../hardware/wiring/wiring-diagram.png) for a visual guide on how to connect all components correctly.

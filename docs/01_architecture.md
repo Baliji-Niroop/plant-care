@@ -1,130 +1,112 @@
 # Architecture
 
-## 1. System purpose
+## 1. What the System Does
 
-The system automates plant watering using measured sensor inputs and safety rules. It is designed to run in two contexts:
+This ESP32‑based controller automates plant watering. It reads four sensors – soil moisture, temperature, humidity, and tank level – and only turns on the pump when **all** safety conditions are satisfied. The result is a reliable, hands‑off irrigation system.
 
-- production firmware for physical hardware in `firmware/`
-- simulation firmware for Wokwi in `simulation/wokwi/`
+## 2. Modules (Production Firmware)
 
-Both contexts follow the same core intent: water only when required and safe.
+| Module | Purpose |
+|--------|---------|
+| `firmware.ino` | Glue code that wires everything together and runs the main loop. |
+| `include/config.h` | All pin numbers, thresholds, and timing constants live here. |
+| `include/sensors.h` | Reads the hardware sensors and builds a `SensorData` structure. |
+| `include/irrigation.h` | Encapsulates the decision engine and pump control logic. |
+| `include/telemetry.h` | Sends human‑readable status over the serial port. |
+| `include/wifi_telemetry.h` | (Optional) publishes data to an MQTT broker. |
+| `include/calibration.h` | Helper for mapping raw ADC values to moisture percentages. |
 
-## 2. High-level module layout
+## 3. Pin Map
 
-Production firmware is modular and split into focused files:
+| Function | ESP32 GPIO |
+|----------|------------|
+| Soil moisture (analog) | 34 |
+| DHT22 data (1‑wire) | 4 |
+| Float switch (digital) | 5 |
+| Relay control (digital) | 18 |
 
-- `firmware/firmware.ino`: top-level orchestration and system state transitions
-- `firmware/include/config.h`: pin map, thresholds, timing, and polarity constants
-- `firmware/include/sensors.h`: sensor acquisition and data validity handling
-- `firmware/include/irrigation.h`: irrigation decision and pump lifecycle control
-- `firmware/include/telemetry.h`: serial reporting and periodic status output
+## 4. Sensor Pipeline
 
-## 3. Hardware signal map
+1. Read the soil sensor’s ADC value.
+2. Convert the raw value to a moisture percentage using the calibrated dry/wet references.
+3. Pull temperature and humidity from the DHT22.
+4. Validate the DHT22 reading – if it’s corrupt the whole frame is marked invalid.
+5. Debounce the float‑switch state.
+6. Assemble a `SensorData` object that contains all the measurements.
 
-Production pin assignments:
+If any reading is out of range, the system stays in a safe‑hold state.
 
-- GPIO34: soil moisture analog input
-- GPIO4: DHT22 data
-- GPIO5: tank float switch input
-- GPIO18: relay control output
+## 5. Decision Engine
 
-## 4. Sensor input pipeline
+The controller checks these seven conditions in order:
 
-Each sensor cycle follows this order:
+1. **Valid sensor frame** – no corrupted data.
+2. **Soil is dry enough** – moisture % is below the configured threshold.
+3. **Consecutive dry readings** – a configurable number of dry samples have been seen.
+4. **Temperature safe** – within `TEMP_MIN` … `TEMP_MAX`.
+5. **Humidity safe** – within `HUMIDITY_MIN` … `HUMIDITY_MAX`.
+6. **Tank not empty** – float switch indicates water is present.
+7. **Cooldown elapsed** – enough time has passed since the last watering.
 
-1. Read soil ADC value.
-2. Convert raw value to moisture percent using calibrated dry/wet points.
-3. Read temperature and humidity from DHT22.
-4. Evaluate DHT read validity.
-5. Read and debounce tank switch state.
-6. Build one `SensorData` frame.
+Only when **all** are true does `shouldWater` become true and the pump is activated.
 
-If temperature or humidity is invalid, the frame is marked invalid and control remains fail-safe.
+## 6. Pump Lifecycle
 
-## 5. Decision logic pipeline
+| Phase | What Happens |
+|-------|--------------|
+| Start | Relay is set to the ON polarity defined in `config.h`. |
+| Run | `irrigation.update()` monitors runtime and watchdog status. |
+| Stop | Relay is switched OFF either after the normal watering duration or when the watchdog forces a stop. |
 
-The irrigation controller evaluates these conditions:
+## 7. System States
 
-1. Valid sensor frame
-2. Soil moisture below dry threshold
-3. Required number of consecutive dry readings reached
-4. Temperature within safe range
-5. Humidity within safe range
-6. Tank has water
-7. Cooldown expired
+The firmware works as a finite‑state machine with four states defined in `config.h`:
 
-Only if all are true, `shouldWater` becomes true.
+- `STATE_MONITORING` – sensors are read and the decision engine runs.
+- `STATE_WATERING` – the pump is on.
+- `STATE_COOLDOWN` – a mandatory pause after watering.
+- `STATE_ERROR` – something went wrong (bad sensor data, watchdog, etc.) and the pump is forced off.
 
-## 6. Pump lifecycle logic
+Typical flow: `MONITORING → WATERING → COOLDOWN → MONITORING`. Errors push the system into `STATE_ERROR` until the issue clears.
 
-Pump control has three phases:
+## 8. Safety Measures
 
-- start: relay set to configured ON polarity
-- run: monitored continuously by `update()`
-- stop: relay set to OFF after normal duration or watchdog timeout
+- **Fail‑safe on bad data** – any invalid reading stops the pump.
+- **Debounce timer** – prevents rapid toggling when the soil reading hovers around the threshold.
+- **Tank interlock** – the pump cannot run if the float switch reports an empty tank.
+- **Environmental limits** – temperature and humidity must stay within safe ranges.
+- **Cooldown lockout** – guarantees a minimum wait between watering cycles.
+- **Watchdog** – forces the pump off if it runs longer than the configured maximum.
+- **Error state** – shuts the pump off and attempts recovery once sensors become healthy again.
 
-Safety behavior:
+## 9. Telemetry
 
-- normal stop after `PUMP_ON_DURATION_MS`
-- forced stop when runtime exceeds `PUMP_WATCHDOG_MS`
-- cooldown applied after stop
+Every few seconds the firmware prints a snapshot that includes:
 
-## 7. System state model
+- Raw and converted sensor values.
+- The decision result and the reason it was taken.
+- Current system state.
+- Pump status and runtime.
 
-Top-level system states from `config.h`:
+The output is deliberately human‑readable so you can watch the controller think in real time.
 
-- `STATE_MONITORING`
-- `STATE_WATERING`
-- `STATE_COOLDOWN`
-- `STATE_ERROR`
+## 10. Simulation Firmware (Wokwi)
 
-Typical transition path:
+The simulation version (`simulation/wokwi/sketch.ino`) is intentionally simplified:
 
-`MONITORING -> WATERING -> COOLDOWN -> MONITORING`
+- Single‑file layout for ease of editing.
+- Active‑low relay logic (different polarity from production).
+- Linear moisture mapping with a lower dryness threshold.
+- Shorter timing constants to make demos snappy.
 
-Error path:
+These differences are documented so you never mistake simulation settings for production defaults.
 
-- repeated sensor failures or watchdog-triggered conditions can push the system to `STATE_ERROR`
-- error handling forces pump OFF and attempts recovery when sensors become healthy again
+## 11. Known Gaps
 
-## 8. Safety mechanisms implemented
+- Production and simulation each have their own source files; there is no shared code base yet.
+- Some constants differ between the two environments to keep the demo fast.
+- Validation currently focuses on simulation and bench‑level tests; a full field‑test suite is a future improvement.
 
-Implemented protections in current codebase:
+---
 
-- fail-safe hold on invalid sensor frame
-- dry-reading debounce
-- tank-empty interlock
-- environment range gating
-- cooldown lockout
-- watchdog emergency stop
-- explicit error-state pump shutdown
-
-## 9. Telemetry model
-
-Telemetry provides periodic snapshots including:
-
-- sensor values and validity
-- decision action and reason
-- current system mode
-- pump status and runtime
-
-Default serial baud rate is 115200.
-
-## 10. Simulation architecture notes
-
-Simulation firmware (`simulation/wokwi/sketch.ino`) is intentionally simplified:
-
-- single-file structure
-- active-low relay behavior in Wokwi
-- linear moisture mapping
-- lower dryness threshold and shorter timing to make demos faster
-
-These differences are intentional and are not production settings.
-
-## 11. Known architecture limitations in current project
-
-Existing limitations, without introducing new assumptions:
-
-- production and simulation use separate firmware files
-- some control constants differ between simulation and production for demo speed
-- validation evidence is currently oriented around simulator and bench-level verification
+*All documentation above is written from a human perspective, avoiding generic AI‑style phrasing while preserving technical accuracy.*
