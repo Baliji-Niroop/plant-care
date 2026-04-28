@@ -10,7 +10,6 @@ All the docs live here, organized by what they help you do. Most people start wi
 
 **[Deployment](./deployment/)** — How to get the system running.
   - **[Deployment Guide](./deployment/deployment.md)** — Step-by-step: build the simulation, test it, then move to hardware if you want
-  - **[Workflow Map](./deployment/workflow.md)** — The big picture flow, includes troubleshooting trees and what to check when things go wrong
 
 **[Validation](./validation/)** — How we test the system. Includes scenarios like "dry soil should water" and "tank empty should block watering." If you modify the logic, you should verify these still pass.
 

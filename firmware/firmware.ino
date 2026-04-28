@@ -43,6 +43,9 @@ void loop() {
   // Keep pump safety enforcement active on every loop.
   irrigation.update();
 
+  // Keep sensors updated for proper fast-debouncing
+  sensors.update();
+
   // Read and evaluate sensors at a fixed interval.
   const bool dueForRead = (millis() - lastSensorReadMs) >= SENSOR_READ_INTERVAL_MS;
   if (dueForRead) {

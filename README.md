@@ -28,6 +28,28 @@ This system doesn't get impatient or forget what it did yesterday. It won't pump
 
 Four independent inputs feed the decision logic. The capacitive soil sensor sits in the plant's soil and gives a 0–4095 ADC reading based on how wet the soil is. The DHT22 measures temperature and humidity so we can avoid watering in unsafe conditions (roots rot faster in cold water than they dry out). The float switch on the water tank prevents the pump from running on an empty tank. Each sensor connects to a different GPIO pin because they use different protocols—some are analog ADC reads, some are digital 1-wire, some are simple digital inputs.
 
+**Pin Diagram (Easy Connections):**
+
+```text
+       ESP32 DevKit                  External Components
+      +----------------+            +-------------------------+
+      |                |            |                         |
+      |         GPIO34 |<-----------+ Soil Sensor (AO)        |
+      |         GPIO4  |<---------->+ DHT22 (DATA)            |
+      |         GPIO5  |<-----------+ Float Switch (Side A)   |
+      |         GPIO18 +----------->+ Relay Module (IN)       |
+      |                |            |                         |
+      |           3.3V +----------->+ Soil Sensor & DHT22 VCC |
+      |           GND  +----------->+ Common Ground           |
+      +----------------+            +-------------------------+
+
+      External 5V Power
+      +----------------+            +-------------------------+
+      |             5V +----------->+ Relay VCC & Pump Power  |
+      |            GND +----------->+ Common Ground           |
+      +----------------+            +-------------------------+
+```
+
 GPIO pin layout:
 - **GPIO34:** Soil moisture (analog ADC)
 - **GPIO4:** DHT22 data (digital 1-wire)

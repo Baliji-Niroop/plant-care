@@ -50,6 +50,18 @@ class Sensors {
     delay(1500);
   }
 
+  void update() {
+    // Debounce float-switch transitions to suppress slosh noise.
+    const bool currentTankState = digitalRead(PIN_TANK_SWITCH) == TANK_WATER_PRESENT_LEVEL;
+    if (currentTankState != lastRawTankState_) {
+      lastRawTankState_ = currentTankState;
+      tankDebounceStart_ = millis();
+    }
+    if ((millis() - tankDebounceStart_) > TANK_DEBOUNCE_MS && lastTankState_ != lastRawTankState_) {
+      lastTankState_ = lastRawTankState_;
+    }
+  }
+
   SensorData read() {
     SensorData data{};
     data.validReading = true;
@@ -69,15 +81,6 @@ class Sensors {
       dhtErrorCount_ = 0;
     }
 
-    // Debounce float-switch transitions to suppress slosh noise.
-    const bool currentTankState = digitalRead(PIN_TANK_SWITCH) == TANK_WATER_PRESENT_LEVEL;
-    if (currentTankState != lastRawTankState_) {
-      lastRawTankState_ = currentTankState;
-      tankDebounceStart_ = millis();
-    }
-    if ((millis() - tankDebounceStart_) > TANK_DEBOUNCE_MS && lastTankState_ != lastRawTankState_) {
-      lastTankState_ = lastRawTankState_;
-    }
     data.tankHasWater = lastTankState_;
 
     return data;
