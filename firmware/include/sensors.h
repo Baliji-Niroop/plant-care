@@ -4,14 +4,8 @@
 #include <Arduino.h>
 #include <DHT.h>
 #include "config.h"
-
-struct SensorData {
-  float soilMoisturePercent;  // 0-100%
-  float temperatureC;
-  float humidityPercent;
-  bool tankHasWater;
-  bool validReading;
-};
+#include "calibration.h"
+#include "sensor_data.h"
 
 class Sensors {
  private:
@@ -22,8 +16,7 @@ class Sensors {
   unsigned long tankDebounceStart_;
 
   // Production calibration references for the capacitive soil sensor.
-  static constexpr int SOIL_RAW_DRY = 3950;
-  static constexpr int SOIL_RAW_WET = 1650;
+  // Values are now fetched from NVS via Calibration class.
   static constexpr unsigned long TANK_DEBOUNCE_MS = 50UL;
 
  public:
@@ -68,7 +61,7 @@ class Sensors {
 
     // Convert raw ADC to moisture percentage using calibrated dry/wet points.
     const int rawSoil = analogRead(PIN_SOIL_SENSOR);
-    data.soilMoisturePercent = static_cast<float>(map(rawSoil, SOIL_RAW_DRY, SOIL_RAW_WET, 0, 100));
+    data.soilMoisturePercent = static_cast<float>(map(rawSoil, calibration.getSoilRawDry(), calibration.getSoilRawWet(), 0, 100));
     data.soilMoisturePercent = constrain(data.soilMoisturePercent, 0.0f, 100.0f);
 
     data.temperatureC = dht_.readTemperature();

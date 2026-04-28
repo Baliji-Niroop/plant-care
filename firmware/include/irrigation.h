@@ -3,7 +3,7 @@
 
 #include <Arduino.h>
 #include "config.h"
-#include "sensors.h"
+#include "sensor_data.h"
 
 enum PumpState {
   PUMP_OFF = 0,

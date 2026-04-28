@@ -32,6 +32,12 @@ constexpr unsigned long TELEMETRY_INTERVAL_MS = 3000UL;
 
 constexpr int SERIAL_BAUD_RATE = 115200;
 
+// Wi-Fi and MQTT Telemetry
+constexpr char WIFI_SSID[] = "YOUR_WIFI_SSID";
+constexpr char WIFI_PASS[] = "YOUR_WIFI_PASSWORD";
+constexpr char MQTT_BROKER[] = "broker.hivemq.com";
+constexpr int MQTT_PORT = 1883;
+
 // Relay polarity for physical hardware. Swap if your relay is active-low.
 constexpr uint8_t RELAY_ON = HIGH;
 constexpr uint8_t RELAY_OFF = LOW;

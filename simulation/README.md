@@ -25,7 +25,7 @@ The simulation is useful if you're learning how the system works, or if you've m
 
 **To validate behavior:**
 
-Follow the scenarios in `docs/validation/simulation-validation-checklist.md`. The simulation is useful specifically because you can test failure modes—set tank to empty, change temperature to freezing, etc.—without breaking real hardware.
+Follow the scenarios in `docs/06_validation.md`. The simulation is useful specifically because you can test failure modes—set tank to empty, change temperature to freezing, etc.—without breaking real hardware.
 
 ## What This Proves
 

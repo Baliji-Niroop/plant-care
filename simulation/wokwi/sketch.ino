@@ -57,8 +57,8 @@ SensorFrame readSensors() {
   s.moisturePercent = map(s.soilRaw, 0, 4095, 0, 100);
   s.moisturePercent = constrain(s.moisturePercent, 0, 100);
 
-  // Slide switch HIGH means water is available.
-  s.tankHasWater = (digitalRead(PIN_TANK_SWITCH) == HIGH);
+  // Slide switch LOW means water is available (INPUT_PULLUP).
+  s.tankHasWater = (digitalRead(PIN_TANK_SWITCH) == LOW);
 
   return s;
 }
@@ -185,7 +185,7 @@ void printTelemetry(const SensorFrame &s, unsigned long now) {
 void setup() {
   Serial.begin(115200);
 
-  pinMode(PIN_TANK_SWITCH, INPUT);
+  pinMode(PIN_TANK_SWITCH, INPUT_PULLUP);
   pinMode(PIN_RELAY, OUTPUT);
 
   dht.setup(PIN_DHT, DHTesp::DHT22);

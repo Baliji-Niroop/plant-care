@@ -1,6 +1,7 @@
 # ESP32 Smart Plant Care System
 
 ![System Architecture](assets/diagrams/system-architecture.svg)
+![Wiring Diagram](hardware/wiring/wiring-diagram.png)
 
 A smart irrigation controller that keeps plants from drowning in inattention. This system replaces human guesswork with actual logic—checking soil moisture, temperature, tank level, and pump history before making a watering decision. It's useful for learning how embedded systems work, but also production-ready for plants that actually matter to you.
 
@@ -12,13 +13,20 @@ This system doesn't get impatient or forget what it did yesterday. It won't pump
 
 ## What Makes It Work
 
-**Layered safety first:** Rather than a simple "if soil < threshold then pump" logic, the system evaluates six constraints in sequence. Any single failure blocks the pump. Sensor invalid? Stop. Soil wet? Stop. Just watered? Stop. Tank empty? Stop hard. Temperature unsafe? Stop. Humidity out of range? Stop. Only when all six pass does the relay close.
+**Layered safety first:** Rather than a simple "if soil < threshold then pump" logic, the system evaluates seven constraints in sequence. Any single failure blocks the pump. Sensor invalid? Stop. Soil wet? Stop. Just watered? Stop. Tank empty? Stop hard. Temperature unsafe? Stop. Humidity out of range? Stop. Only when all seven pass does the relay close.
 
 **Completely observable:** Serial output at 115200 baud shows every sensor reading and every decision. You can watch the system think. Pump didn't turn on? Look at the telemetry—soil was above threshold, or tank was empty, or we're still in cooldown. No magic. No guessing.
 
 **Built from real failures:** This isn't theoretical. The cooldown timer exists because early prototypes watered ten times in a row and drowned plants. The separate power rails exist because pump inrush current made the controller reset in the middle of decisions. The debounce timer exists because soil readings bounce around the threshold and we don't want to spam the pump. Every safety layer came from hitting a wall first.
 
 **Ready for real use:** Runs on a $15 ESP32 with off-the-shelf components. Includes a Wokwi simulation for learning and testing without risking hardware. Includes production firmware with comprehensive telemetry for actual deployment. Calibration procedures let you tune it for your specific soil and sensors.
+
+## 🚀 Quick Start
+1. **Clone repo**: `git clone https://github.com/yourusername/ESP32-PLANT-CARE.git`
+2. **Upload firmware**: Open `firmware/` in PlatformIO or Arduino IDE and upload to ESP32.
+3. **Connect hardware**: Wire sensors and relay following the [Wiring Diagram](hardware/wiring/wiring-diagram.png).
+4. **Open serial monitor**: Set baud rate to 115200. Follow the 10-second calibration prompt.
+5. **Watch system auto-irrigate**: The system evaluates 7 conditions before turning on the pump.
 
 ---
 
@@ -58,7 +66,7 @@ GPIO pin layout:
 
 ### The Decision Logic
 
-Watering happens only when *all* six conditions pass. Any single failure means pump stays off and the system keeps monitoring:
+Watering happens only when *all* seven conditions pass. Any single failure means pump stays off and the system keeps monitoring:
 
 1. **Sensor frame valid?** If the sensor reading is garbage (sensor disconnected, timeout, invalid ADC range), the pump stays OFF indefinitely. Bad data beats bad assumptions.
 
@@ -66,13 +74,15 @@ Watering happens only when *all* six conditions pass. Any single failure means p
 
 3. **Debounce timer expired?** Soil readings bounce around the threshold and can trigger multiple times. If the soil crossed the threshold less than 5 seconds ago, we wait before deciding. This prevents the pump from clicking on and off rapidly.
 
-4. **Temperature and humidity safe?** We check if the DHT22 readings are within safe bounds (example: 10°C to 35°C, 30% to 80% humidity, configurable). Watering in extreme conditions can damage roots. Out of range? Pump stays off.
+4. **Temperature safe?** We check if the DHT22 temperature is within safe bounds (example: 10°C to 35°C). Watering in extreme conditions can damage roots. Out of range? Pump stays off.
 
-5. **Tank has water?** The float switch on GPIO5 is a hard interlock. If the tank is empty (float switch HIGH), the pump cannot run. Full stop. This prevents damage from dry-running.
+5. **Humidity safe?** We check if the DHT22 humidity is within safe bounds (example: 30% to 80%).
 
-6. **Not in cooldown?** After each 10-second watering cycle, a 60-second cooldown kicks in. This prevents rapid cycling that stresses the pump and prevents the plant from drowning. If we're still in cooldown, pump stays off.
+6. **Tank has water?** The float switch on GPIO5 is a hard interlock. If the tank is empty (float switch HIGH), the pump cannot run. Full stop. This prevents damage from dry-running.
 
-If all six pass, GPIO18 goes HIGH. The relay closes. The pump runs for 10 seconds. A watchdog timer monitors runtime—if it somehow exceeds 30 seconds, an emergency stop triggers. After the pump stops, cooldown begins.
+7. **Not in cooldown?** After each 10-second watering cycle, a 60-second cooldown kicks in. This prevents rapid cycling that stresses the pump and prevents the plant from drowning. If we're still in cooldown, pump stays off.
+
+If all seven pass, GPIO18 goes HIGH. The relay closes. The pump runs for 10 seconds. A watchdog timer monitors runtime—if it somehow exceeds 30 seconds, an emergency stop triggers. After the pump stops, cooldown begins.
 
 ### Power Architecture
 
@@ -164,9 +174,9 @@ Every safety layer came from real problems. The **fail-safe hold** means invalid
 ### Path 1: Learn How It Works (30 minutes)
 
 1. Read this README (you're here)
-2. Open `docs/architecture/architecture.md` for the complete technical design
+2. Open `docs/01_architecture.md` for the complete technical design
 3. Set up the simulation: `simulation/README.md`
-4. Run the validation scenarios: `docs/validation/simulation-validation-checklist.md`
+4. Run the validation scenarios: `docs/06_validation.md`
 
 You'll see the system working risk-free and understand the decision logic before touching any hardware.
 
@@ -176,13 +186,13 @@ You'll see the system working risk-free and understand the decision logic before
 2. Gather all parts (total cost around $40–60)
 3. Follow `hardware/wiring/build-guide.md` step-by-step for assembly
 4. Flash firmware: `firmware/README.md`
-5. Calibrate for your soil: `docs/calibration/calibration.md`
-6. Validate on your plant: `docs/validation/simulation-validation-checklist.md`
+5. Calibrate for your soil: `docs/04_calibration.md`
+6. Validate on your plant: `docs/06_validation.md`
 
 ### Path 3: Contribute or Modify (review first)
 
 1. Read `CONTRIBUTING.md` for project principles
-2. Review `docs/architecture/architecture.md` to understand the design
+2. Review `docs/01_architecture.md` to understand the design
 3. Test changes in simulation: `simulation/README.md`
 4. Run validation scenarios to verify nothing broke
 5. Submit changes with clear reasoning
@@ -197,7 +207,7 @@ The system ships with reference calibration values for the soil sensor:
 - **Wet reference:** ~1650 ADC counts (sensor in saturated soil)
 - **Linear mapping:** Percentage = 100 × (3950 - ADC) / (3950 - 1650)
 
-Your specific sensor may differ. Verify and adjust using procedures in `docs/calibration/calibration.md` before deploying to unattended operation.
+Your specific sensor may differ. Verify and adjust using procedures in `docs/04_calibration.md` before deploying to unattended operation.
 
 The system is validated using scenario-based testing:
 
@@ -207,7 +217,7 @@ The system is validated using scenario-based testing:
 - **Cooldown:** Immediate retrigger after cycle → pump blocked by timer
 - **Watchdog:** Force long runtime → emergency stop activates
 
-Evidence is captured as telemetry output and screen captures. Full validation checklist: `docs/validation/simulation-validation-checklist.md`
+Evidence is captured as telemetry output and screen captures. Full validation checklist: `docs/06_validation.md`
 
 ---
 
@@ -234,11 +244,11 @@ Evidence is captured as telemetry output and screen captures. Full validation ch
 | Document | Purpose |
 |----------|---------|
 | **`docs/README.md`** | Documentation index and structure |
-| **`docs/architecture/architecture.md`** | Complete system design and technical details |
-| **`docs/calibration/calibration.md`** | Sensor calibration procedure and thresholds |
-| **`docs/deployment/`** | Step-by-step deployment procedures |
-| **`docs/validation/simulation-validation-checklist.md`** | Test scenarios and validation procedures |
-| **`docs/troubleshooting/assembly-notes.md`** | Prototype development log and issue resolution |
+| **`docs/01_architecture.md`** | Complete system design and technical details |
+| **`docs/04_calibration.md`** | Sensor calibration procedure and thresholds |
+| **`docs/05_deployment.md`** | Step-by-step deployment procedures |
+| **`docs/06_validation.md`** | Test scenarios and validation procedures |
+| **`docs/07_troubleshooting.md`** | Prototype development log and issue resolution |
 | **`firmware/README.md`** | Firmware structure and build instructions |
 | **`simulation/README.md`** | Simulation environment setup |
 | **`hardware/README.md`** | Hardware design reference |
@@ -256,8 +266,8 @@ MIT License. See `LICENSE` file for complete terms.
 
 ## Support
 
-- **Questions about the system?** Start with `docs/architecture/architecture.md`
-- **Having issues building it?** Check `docs/troubleshooting/assembly-notes.md`
+- **Questions about the system?** Start with `docs/01_architecture.md`
+- **Having issues building it?** Check `docs/07_troubleshooting.md`
 - **Found a bug?** Read the validation checklist to isolate the problem
 - **Want to contribute?** Follow guidelines in `CONTRIBUTING.md`
 

@@ -1,6 +1,6 @@
 # Production Firmware
 
-This directory contains the firmware that runs on physical ESP32 hardware. It implements the 6-stage decision logic, sensor acquisition, safety mechanisms, and telemetry that make the system work.
+This directory contains the firmware that runs on physical ESP32 hardware. It implements the 7-stage decision logic, sensor acquisition, safety mechanisms, and telemetry that make the system work.
 
 ## What This Code Does
 
@@ -35,7 +35,7 @@ The firmware is responsible for four things:
 - Frame validity checking (validates all readings before use)
 
 **`include/irrigation.h`** — Decision logic and pump control
-- The 6-stage decision hierarchy (checks all constraints)
+- The 7-stage decision hierarchy (checks all constraints)
 - Relay control (GPIO18 output)
 - Cooldown timer and enforcement
 - Watchdog timer implementation
@@ -124,7 +124,7 @@ If your board has different pin assignments, edit these.
 #define SOIL_DRY_REFERENCE 3950    // ADC reading when sensor in air
 #define SOIL_WET_REFERENCE 1650    // ADC reading when sensor in saturated soil
 ```
-These are the mapping points. If your specific sensor reads differently, update these values using procedures in `docs/calibration/calibration.md`.
+These are the mapping points. If your specific sensor reads differently, update these values using procedures in `docs/04_calibration.md`.
 
 **Decision thresholds:**
 ```c
@@ -177,7 +177,7 @@ Replace `COM3` with your actual serial port (use `arduino-cli board list` to fin
 1. Open serial monitor at 115200 baud (Arduino IDE: Tools → Serial Monitor)
 2. You should see telemetry output immediately
 3. Watch for sensor readings and decision logic results
-4. Verify the system behaves as expected per `docs/validation/simulation-validation-checklist.md`
+4. Verify the system behaves as expected per `docs/06_validation.md`
 
 ---
 
@@ -205,7 +205,7 @@ If the pump doesn't turn on, look at the telemetry. You'll see which constraint 
 
 **DO NOT flash this to the Wokwi simulation.** The simulation runs different firmware (`simulation/wokwi/sketch.ino`) with different timing and parameters. They're intentionally different and incompatible.
 
-**Verify calibration before unattended deployment.** The calibration references in `config.h` are based on reference sensors. Your specific sensor may drift over time or behave differently. Use procedures in `docs/calibration/calibration.md` to verify and adjust thresholds before trusting the system with plants that matter.
+**Verify calibration before unattended deployment.** The calibration references in `config.h` are based on reference sensors. Your specific sensor may drift over time or behave differently. Use procedures in `docs/04_calibration.md` to verify and adjust thresholds before trusting the system with plants that matter.
 
 **Watchdog timeout is fixed at 30 seconds for safety.** If you change `WATCHDOG_TIMEOUT_MS`, keep it high enough that the pump won't trigger it during normal 10-second operation, but low enough to catch runaway conditions. We recommend leaving it at 30 seconds.
 
@@ -221,15 +221,15 @@ If the pump doesn't turn on, look at the telemetry. You'll see which constraint 
 
 **Watchdog keeps triggering:** The pump is running longer than 30 seconds. Either the pump is stuck, or the relay isn't closing properly. Check relay wiring and polarity settings.
 
-For more troubleshooting, see `docs/troubleshooting/assembly-notes.md`.
+For more troubleshooting, see `docs/07_troubleshooting.md`.
 
 ---
 
 ## Related Documentation
 
-- **How the system makes decisions:** `docs/architecture/architecture.md`
-- **Sensor calibration:** `docs/calibration/calibration.md`
+- **How the system makes decisions:** `docs/01_architecture.md`
+- **Sensor calibration:** `docs/04_calibration.md`
 - **Hardware pin mapping:** `hardware/README.md`
-- **Testing and validation:** `docs/validation/simulation-validation-checklist.md`
-- **Deployment procedures:** `docs/deployment/deployment.md`
+- **Testing and validation:** `docs/06_validation.md`
+- **Deployment procedures:** `docs/05_deployment.md`
 

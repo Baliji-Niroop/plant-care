@@ -48,9 +48,10 @@ The irrigation controller evaluates these conditions:
 1. Valid sensor frame
 2. Soil moisture below dry threshold
 3. Required number of consecutive dry readings reached
-4. Temperature and humidity within safe range
-5. Tank has water
-6. Cooldown expired
+4. Temperature within safe range
+5. Humidity within safe range
+6. Tank has water
+7. Cooldown expired
 
 Only if all are true, `shouldWater` becomes true.
 

@@ -5,10 +5,14 @@
 #include "include/sensors.h"
 #include "include/irrigation.h"
 #include "include/telemetry.h"
+#include "include/wifi_telemetry.h"
+#include "include/calibration.h"
 
 Sensors sensors;
 IrrigationController irrigation;
 Telemetry telemetry;
+WifiTelemetry wifiTelemetry;
+Calibration calibration(PIN_SOIL_SENSOR);
 
 SystemState systemState = STATE_MONITORING;
 SystemState previousState = STATE_MONITORING;
@@ -33,8 +37,10 @@ void setSystemState(SystemState nextState) {
 
 void setup() {
   telemetry.begin();
+  calibration.setup();
   sensors.begin();
   irrigation.begin();
+  wifiTelemetry.setup();
 
   Serial.println("[init] Production firmware online");
 }
@@ -45,6 +51,8 @@ void loop() {
 
   // Keep sensors updated for proper fast-debouncing
   sensors.update();
+
+  wifiTelemetry.update();
 
   // Read and evaluate sensors at a fixed interval.
   const bool dueForRead = (millis() - lastSensorReadMs) >= SENSOR_READ_INTERVAL_MS;
@@ -100,6 +108,7 @@ void loop() {
   }
 
   telemetry.periodicReport(currentData, lastDecision, systemState, irrigation);
+  wifiTelemetry.publishData(currentData, systemState, lastDecision.reason.c_str());
 
   delay(MAIN_LOOP_DELAY_MS);
 }

@@ -23,14 +23,14 @@ Contributions that improve the project without introducing hidden assumptions or
 **Take 15 minutes and read these:**
 
 1. [`README.md`](./README.md) — What this system actually does and why
-2. [`docs/architecture/architecture.md`](./docs/architecture/architecture.md) — How the decision logic works
-3. [`docs/deployment/workflow.md`](./docs/deployment/workflow.md) — End-to-end workflow and decision procedures
+2. [`docs/01_architecture.md`](./docs/01_architecture.md) — How the decision logic works
+3. [`docs/05_deployment.md`](./docs/05_deployment.md) — End-to-end workflow and decision procedures
 
 **Then, based on what you're changing, read:**
 
-- **Changing how sensors work?** → `docs/calibration/calibration.md` explains calibration and thresholds
-- **Modifying workflows?** → `docs/deployment/deployment.md` explains what must stay synchronized
-- **Adding features?** → `docs/validation/simulation-validation-checklist.md` shows how features are validated
+- **Changing how sensors work?** → `docs/04_calibration.md` explains calibration and thresholds
+- **Modifying workflows?** → `docs/05_deployment.md` explains what must stay synchronized
+- **Adding features?** → `docs/06_validation.md` shows how features are validated
 - **Updating hardware wiring?** → `hardware/README.md` shows pin mappings and electrical design
 - **Working on the simulation?** → `simulation/wokwi/README.md` explains simulation-specific differences
 
@@ -49,7 +49,7 @@ If you're modifying files in `firmware/` or `firmware/include/`, verify all of t
 - Relay and tank switch polarity settings are documented and intentional
 
 **Safety logic stays intact:**
-- The 6-stage decision hierarchy is preserved (or changes are clearly justified)
+- The 7-stage decision hierarchy is preserved (or changes are clearly justified)
 - Tank interlock and watchdog protections are not bypassed
 - Error handling catches edge cases (sensor disconnected, ADC out of range, etc.)
 
@@ -66,7 +66,7 @@ If you're modifying files in `firmware/` or `firmware/include/`, verify all of t
 
 **Documentation stays synchronized:**
 - If code structure changes, update `firmware/README.md`
-- If logic flow changes, update `docs/architecture/architecture.md`
+- If logic flow changes, update `docs/01_architecture.md`
 - If pin mapping changes, update `hardware/README.md`
 
 ---
@@ -90,7 +90,7 @@ If you're modifying files in `simulation/wokwi/`:
 - Scripts referenced in `README.md` still execute correctly
 
 **Validation:**
-- Test scenarios in `docs/validation/simulation-validation-checklist.md` still pass
+- Test scenarios in `docs/06_validation.md` still pass
 - New behavior has corresponding validation steps
 - Telemetry output format stays consistent
 
@@ -141,7 +141,7 @@ Add watchdog timer for pump runtime protection
 - Telemetry reports watchdog activation events
 - Verified in simulation scenarios 4 and 5
 
-Refs: docs/architecture/architecture.md#safety-mechanisms
+Refs: docs/01_architecture.md#safety-mechanisms
 ```
 
 **Bad commit messages:**

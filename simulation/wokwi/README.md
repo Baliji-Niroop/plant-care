@@ -70,4 +70,4 @@ After startup, validate:
 - environment safety hold behavior
 - cooldown behavior
 
-Use `../../docs/validation/simulation-validation-checklist.md` for the formal scenario checklist.
+Use `../../docs/06_validation.md` for the formal scenario checklist.
