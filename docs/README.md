@@ -2,7 +2,6 @@
 
 All the docs live here, organized by what they help you do. Most people start with the root README, but depending on what you're working on, you might jump straight to architecture if you want to understand the decision logic, or deployment if you want to get something running.
 
-## What's Where
 ## System Documentation
 
 This folder contains the complete, detailed documentation for the ESP32 Smart Plant Care system. Read these files in order to fully understand, deploy, and maintain the project.
