@@ -60,9 +60,17 @@ class Sensors {
     data.validReading = true;
 
     // Convert raw ADC to moisture percentage using calibrated dry/wet points.
+    // Safe float-based calculation to prevent division-by-zero and truncation.
     const int rawSoil = analogRead(PIN_SOIL_SENSOR);
-    data.soilMoisturePercent = static_cast<float>(map(rawSoil, calibration.getSoilRawDry(), calibration.getSoilRawWet(), 0, 100));
-    data.soilMoisturePercent = constrain(data.soilMoisturePercent, 0.0f, 100.0f);
+    const int dryRef = calibration.getSoilRawDry();
+    const int wetRef = calibration.getSoilRawWet();
+    
+    if (dryRef == wetRef) {
+      data.soilMoisturePercent = 0.0f; // Safe fallback if references match
+    } else {
+      data.soilMoisturePercent = 100.0f * static_cast<float>(rawSoil - dryRef) / static_cast<float>(wetRef - dryRef);
+      data.soilMoisturePercent = constrain(data.soilMoisturePercent, 0.0f, 100.0f);
+    }
 
     data.temperatureC = dht_.readTemperature();
     data.humidityPercent = dht_.readHumidity();

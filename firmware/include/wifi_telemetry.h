@@ -20,6 +20,8 @@ class WifiTelemetry {
   unsigned long lastPublishTime_;
   const unsigned long publishIntervalMs_;
   bool mqttEnabled_;
+  unsigned long lastMqttAttempt_;
+  static constexpr unsigned long MQTT_RECONNECT_INTERVAL_MS = 15000UL;
 
   void connectWiFi() {
     Serial.printf("[WiFi] Connecting to %s ", WIFI_SSID);
@@ -40,18 +42,27 @@ class WifiTelemetry {
   }
 
   void connectMQTT() {
-    if (!client_.connected() && WiFi.status() == WL_CONNECTED) {
-      Serial.print("[MQTT] Connecting to broker...");
-      
-      String clientId = "ESP32PlantCare-";
-      clientId += String(random(0xffff), HEX);
-      
-      if (client_.connect(clientId.c_str())) {
-        Serial.println("connected");
-        client_.subscribe("/plant/override");
-      } else {
-        Serial.printf("failed, rc=%d. Will retry later.\n", client_.state());
-      }
+    if (WiFi.status() != WL_CONNECTED || client_.connected()) {
+      return;
+    }
+
+    const unsigned long now = millis();
+    if (now - lastMqttAttempt_ < MQTT_RECONNECT_INTERVAL_MS) {
+      return; // Cooldown active, don't block loop with connection retry
+    }
+
+    lastMqttAttempt_ = now;
+    Serial.print("[MQTT] Connecting to broker...");
+    
+    String clientId = "ESP32PlantCare-";
+    clientId += String(random(0xffff), HEX);
+    
+    if (client_.connect(clientId.c_str())) {
+      Serial.println("connected");
+      client_.subscribe("/plant/override");
+    } else {
+      Serial.printf("failed, rc=%d. Will retry in %lu seconds.\n", 
+                    client_.state(), MQTT_RECONNECT_INTERVAL_MS / 1000UL);
     }
   }
 
@@ -78,7 +89,8 @@ class WifiTelemetry {
       : client_(espClient_), 
         lastPublishTime_(0), 
         publishIntervalMs_(30000UL), 
-        mqttEnabled_(false) {
+        mqttEnabled_(false),
+        lastMqttAttempt_(0) {
     if (String(WIFI_SSID) != "YOUR_WIFI_SSID") {
       mqttEnabled_ = true;
     }

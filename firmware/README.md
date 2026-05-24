@@ -111,44 +111,49 @@ Every safety layer came from hitting real problems:
 Everything tunable lives in `include/config.h`. You should only need to change this file in normal use:
 
 **GPIO pin numbers:**
-```c
-#define PIN_SOIL_SENSOR 34      // ADC input, analog
-#define PIN_DHT22_DATA 4        // Digital 1-wire protocol
-#define PIN_TANK_FLOAT_SWITCH 5 // Digital input, pulled high
-#define PIN_RELAY_CONTROL 18    // Digital output to relay
+```cpp
+constexpr uint8_t PIN_SOIL_SENSOR = 34;   // Analog input for soil sensor
+constexpr uint8_t PIN_DHT = 4;            // DHT22 data pin
+constexpr uint8_t PIN_TANK_SWITCH = 5;    // Float switch pin
+constexpr uint8_t PIN_RELAY = 18;         // Relay input pin
 ```
 If your board has different pin assignments, edit these.
 
 **Sensor calibration:**
-```c
-#define SOIL_DRY_REFERENCE 3950    // ADC reading when sensor in air
-#define SOIL_WET_REFERENCE 1650    // ADC reading when sensor in saturated soil
+Calibration references are managed dynamically at runtime via NVS (Non-Volatile Storage). On boot, the system waits 10 seconds for user calibration commands to save dry/wet references. The defaults (if no calibration is stored) are defined in `include/calibration.h`:
+```cpp
+static constexpr int DEFAULT_SOIL_RAW_DRY = 3950;
+static constexpr int DEFAULT_SOIL_RAW_WET = 1650;
 ```
-These are the mapping points. If your specific sensor reads differently, update these values using procedures in `docs/04_calibration.md`.
+For more information, see `docs/04_calibration.md`.
 
 **Decision thresholds:**
-```c
-#define TEMP_MIN_SAFE 10     // Don't water below this (°C)
-#define TEMP_MAX_SAFE 35     // Don't water above this (°C)
-#define HUMIDITY_MIN 30      // Don't water below this (%)
-#define HUMIDITY_MAX 80      // Don't water above this (%)
+```cpp
+constexpr int SOIL_DRY_THRESHOLD_PERCENT = 60; // Water below this moisture level
+
+constexpr float TEMP_MIN_C = 15.0f;            // Don't water below this (°C)
+constexpr float TEMP_MAX_C = 40.0f;            // Don't water above this (°C)
+constexpr float HUMIDITY_MIN_PERCENT = 30.0f;  // Don't water below this (%)
+constexpr float HUMIDITY_MAX_PERCENT = 80.0f;  // Don't water above this (%)
 ```
 
 **Timing parameters:**
-```c
-#define DHT_WARMUP_DELAY_MS 2000   // DHT22 needs 2 seconds post-boot
-#define DEBOUNCE_DURATION_MS 5000  // Wait 5 seconds when soil near threshold
-#define PUMP_RUNTIME_MS 10000      // Run pump for 10 seconds per cycle
-#define COOLDOWN_DURATION_MS 60000 // Wait 60 seconds before next cycle
-#define WATCHDOG_TIMEOUT_MS 30000  // Force stop if pump runs longer than 30 seconds
+```cpp
+constexpr uint8_t DECISION_DEBOUNCE_READINGS = 3;  // Dry readings needed to trigger pump
+constexpr unsigned long SENSOR_READ_INTERVAL_MS = 2000UL; // Loop cycle frequency
+constexpr unsigned long PUMP_ON_DURATION_MS = 5000UL;     // Pump runtime per cycle (5s)
+constexpr unsigned long PUMP_COOLDOWN_MS = 60000UL;       // Cooldown before next run (60s)
+constexpr unsigned long PUMP_WATCHDOG_MS = 10000UL;       // Max safety pump runtime limit (10s)
 ```
 
-**Polarity settings:**
-```c
-#define RELAY_ACTIVE_HIGH true    // true = pump on when GPIO18 HIGH; false = pump on when GPIO18 LOW
-#define TANK_SWITCH_LOW_MEANS_WATER true  // true = water present when GPIO5 LOW; false = water present when GPIO5 HIGH
+**Polarity & Electrical settings:**
+```cpp
+constexpr uint8_t RELAY_ON = HIGH;           // Output level to trigger relay (HIGH/LOW)
+constexpr uint8_t RELAY_OFF = LOW;
+constexpr uint8_t TANK_SWITCH_PIN_MODE = INPUT_PULLUP;
+constexpr uint8_t TANK_WATER_PRESENT_LEVEL = LOW; // GPIO level when water is present
 ```
-These depend on your specific relay and float switch. Check your component datasheets.
+These depend on your specific relay module and float switch wiring.
 
 After changing any of these, rebuild and reflash the firmware.
 
@@ -183,21 +188,36 @@ Replace `COM3` with your actual serial port (use `arduino-cli board list` to fin
 
 ## Understanding the Telemetry Output
 
-The serial output is human-readable and designed for real-time monitoring. A typical line looks like:
+The serial output is structured and easy to read. A typical periodic report printed to the Serial Monitor every 3 seconds looks like this:
 
-```
-SENSOR: soil=2100 temp=22.5 hum=65.2 tank=OK | DECISION: PUMP_ON | EVENT: Pump started (10s runtime)
+```text
+========== SYSTEM STATUS ==========
+Uptime: 45s
+--- Sensor Snapshot ---
+Reading: valid
+Soil: 42.5% [dry]
+Temp: 24.2 C
+Humidity: 55.8 %
+Tank: available
+
+--- Decision ---
+Action: WATER NOW
+Reason: Ready to water
+
+Mode: watering
+Pump: running (2s)
 ```
 
 This tells you:
-- Soil ADC is 2100 (dry)
-- Temperature is 22.5°C (safe)
-- Humidity is 65.2% (safe)
-- Tank has water
-- Decision was to turn on the pump
-- Event: pump activated and will run for 10 seconds
+- System uptime is 45 seconds.
+- Soil moisture is 42.5%, which is below the dry threshold (60%).
+- Temperature (24.2°C) and Humidity (55.8%) are within safe bounds.
+- Water tank is full/available.
+- Decision: Trigger watering.
+- Mode: Currently in `STATE_WATERING`.
+- Pump: Running (actively pumping for 2 seconds).
 
-If the pump doesn't turn on, look at the telemetry. You'll see which constraint failed.
+If the pump doesn't turn on, you can look at the **Decision -> Reason** line to see exactly which safety check failed.
 
 ---
 
@@ -205,21 +225,21 @@ If the pump doesn't turn on, look at the telemetry. You'll see which constraint 
 
 **DO NOT flash this to the Wokwi simulation.** The simulation runs different firmware (`simulation/wokwi/sketch.ino`) with different timing and parameters. They're intentionally different and incompatible.
 
-**Verify calibration before unattended deployment.** The calibration references in `config.h` are based on reference sensors. Your specific sensor may drift over time or behave differently. Use procedures in `docs/04_calibration.md` to verify and adjust thresholds before trusting the system with plants that matter.
+**Verify calibration before unattended deployment.** The default calibration references in the code are based on standard capacitive sensors. Your specific sensor may drift or act differently. Use procedures in `docs/04_calibration.md` to calibrate the sensor on-site before deploying it.
 
-**Watchdog timeout is fixed at 30 seconds for safety.** If you change `WATCHDOG_TIMEOUT_MS`, keep it high enough that the pump won't trigger it during normal 10-second operation, but low enough to catch runaway conditions. We recommend leaving it at 30 seconds.
+**Watchdog timeout is fixed at 10 seconds for safety.** If you change `PUMP_WATCHDOG_MS`, make sure it is high enough that the pump won't trigger it during normal 5-second operation (`PUMP_ON_DURATION_MS`), but low enough to catch runaway conditions quickly. We recommend leaving it at 10 seconds.
 
 ---
 
 ## If Something Goes Wrong
 
-**Pump won't turn on:** Check the telemetry output. Look for which constraint is failing. If it's soil threshold, your sensor may need recalibration. If it's tank empty, check the float switch. If it's cooldown, just wait—that's intentional.
+**Pump won't turn on:** Check the telemetry output. Look for which constraint is failing under the `--- Decision ---` section. If it's soil threshold, your sensor may need recalibration. If it's tank empty, check the float switch. If it's cooldown, just wait—that's intentional.
 
 **Telemetry is garbage:** Verify serial baud rate is 115200. Try unplugging and replugging the USB cable. If still bad, verify the ESP32 is detected using `arduino-cli board list`.
 
 **Sensor reads are always the same:** The sensor might be disconnected, or the ADC input isn't working. Check GPIO34 wiring.
 
-**Watchdog keeps triggering:** The pump is running longer than 30 seconds. Either the pump is stuck, or the relay isn't closing properly. Check relay wiring and polarity settings.
+**Watchdog keeps triggering:** The pump is running longer than 10 seconds. Check if the relay is stuck, or if you changed `PUMP_ON_DURATION_MS` to be longer than `PUMP_WATCHDOG_MS`.
 
 For more troubleshooting, see `docs/07_troubleshooting.md`.
 

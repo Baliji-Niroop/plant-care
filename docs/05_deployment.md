@@ -47,7 +47,7 @@ Use one of the following:
 
 ### 3.4 Validate behavior
 
-Run checklist scenarios in `../validation/simulation-validation-checklist.md`.
+Run checklist scenarios in [docs/06_validation.md](06_validation.md).
 
 ## 4. Hardware deployment (ESP32)
 
